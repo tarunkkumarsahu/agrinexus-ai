@@ -2,9 +2,9 @@
 
 Evidence-driven agricultural decision intelligence for **web and Android**, with a shared backend.
 
-## Status: v0.1 foundation
+## Status: v0.3 local development prototype
 
-This repository contains a Next.js/TypeScript web demo, a Kotlin/Jetpack Compose Android scaffold, and a shared FastAPI backend. The backend has a deterministic **illustrative** irrigation-scenario comparison and missing-evidence response. This is NOT yet an AI model, real weather feed, real digital twin, validated agronomic decision tool, persistent decision passport or finished mobile release. Do not use demo numbers for agricultural decisions.
+This repository contains a Next.js/TypeScript web demo, a Kotlin/Jetpack Compose Android scaffold, and a shared FastAPI backend. The backend has a deterministic **illustrative** irrigation-scenario comparison and missing-evidence response, local SQLite farm/observation records, a provenance-labeled weather proxy, a timestamped farm-context snapshot, and locally persisted example decision passports. A real provider weather forecast can be fetched, but this is NOT yet an AI model, scientifically validated digital twin, actionable agronomic decision tool, verified outcome record or finished mobile release. Forecasts are displayed separately and are not automatically used in irrigation calculations. Do not use demo numbers for agricultural decisions.
 
 ## Monorepo structure
 
@@ -45,6 +45,10 @@ This personal repository is the development source. The separate HackIndia Team 
 
 ## Limitations and roadmap
 
-Current results use manually entered, unverified quantities. Scenarios are not crop-specific and do not model soil drainage, runoff, forecast uncertainty, or plant physiology. Passport IDs are ephemeral. Next build persisted farm profiles, timestamped weather provenance, a validated agronomic calculation, a tool-using AI explanation layer, genuine evidence gating and stored outcome verification.
+Current results use manually entered, unverified quantities. Scenarios are not crop-specific and do not model soil drainage, runoff, forecast uncertainty, or plant physiology. Passport IDs are ephemeral. Next build account-protected farm profiles, timestamped field-measurement provenance, scientifically validated agronomic calculations, a tool-using AI explanation layer, stronger evidence gating and independently recorded field outcomes.
+
+Weather preview: below the scenario comparison and farm workspace, enter approximate latitude and longitude (2 decimals sent to the provider) and fetch an Open-Meteo forecast. Only use this integration for non-commercial demonstration unless appropriate commercial terms are in place. Source: https://open-meteo.com/en/docs and terms https://open-meteo.com/en/terms .
+
+Select a saved demo farm in the Farm Workspace before running a scenario comparison to store a **local, explicitly illustrative** decision passport. Without a selected farm, results remain ephemeral. These records are NOT verified real-world farming outcomes.
 
 See docs/architecture.md and docs/ai-usage-log.md. Do not claim tests, Android builds, deployment, or AI functionality not independently verified.

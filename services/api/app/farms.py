@@ -13,6 +13,8 @@ from uuid import uuid4
 from fastapi import HTTPException
 from pydantic import BaseModel, Field
 
+from .schemas import DecisionResponse, IrrigationRequest
+
 
 class FarmCreate(BaseModel):
     name: str = Field(min_length=2, max_length=80)
@@ -45,6 +47,26 @@ class Observation(BaseModel):
     source: str = "manual_unverified"
 
 
+class FarmSnapshot(BaseModel):
+    farm: Farm
+    latest_observation: Observation | None
+    observation_status: str
+    observation_age_hours: float | None
+    warning: str
+
+
+class Passport(BaseModel):
+    id: str
+    farm_id: str
+    created_at: str
+    request: IrrigationRequest
+    decision: DecisionResponse
+    warning: str = (
+        "Stored illustrative model output using manually entered, unverified inputs. "
+        "Not a verified farm outcome or irrigation recommendation."
+    )
+
+
 def _db_path() -> Path:
     return Path(os.getenv("AGRINEXUS_DB_PATH", str(Path(__file__).resolve().parents[1] / "local_farms.sqlite3")))
 
@@ -65,6 +87,10 @@ def _database():
             id TEXT PRIMARY KEY, farm_id TEXT NOT NULL REFERENCES farms(id),
             soil_moisture_pct REAL NOT NULL, note TEXT NOT NULL,
             recorded_at TEXT NOT NULL, source TEXT NOT NULL
+        )""")
+        connection.execute("""CREATE TABLE IF NOT EXISTS passports (
+            id TEXT PRIMARY KEY, farm_id TEXT NOT NULL REFERENCES farms(id),
+            created_at TEXT NOT NULL, request_json TEXT NOT NULL, decision_json TEXT NOT NULL
         )""")
         yield connection
         connection.commit()
@@ -128,3 +154,61 @@ def list_observations(farm_id: str) -> list[Observation]:
             (farm_id,),
         ).fetchall()
     return [Observation(**dict(row)) for row in rows]
+
+
+def build_farm_snapshot(farm_id: str) -> FarmSnapshot:
+    farm = get_farm(farm_id)
+    observations = list_observations(farm_id)
+    latest = observations[0] if observations else None
+    age = None
+    if latest:
+        age = max(0.0, (
+            datetime.now(timezone.utc) - datetime.fromisoformat(latest.recorded_at)
+        ).total_seconds() / 3600)
+    status = "missing" if age is None else ("stale" if age > 24 else "recorded_unverified")
+    return FarmSnapshot(
+        farm=farm,
+        latest_observation=latest,
+        observation_status=status,
+        observation_age_hours=round(age, 2) if age is not None else None,
+        warning=(
+            "This is a timestamped record of manual observations, not a validated crop digital twin. "
+            "Soil-moisture percentage cannot be converted to root-zone stored water (mm) "
+            "without additional soil and measurement context."
+        ),
+    )
+
+
+def save_passport(farm_id: str, request: IrrigationRequest, decision: DecisionResponse) -> Passport:
+    passport = Passport(
+        id=decision.passport_id, farm_id=farm_id,
+        created_at=_utc_now(), request=request, decision=decision,
+    )
+    with _database() as db:
+        _ensure_farm(db, farm_id)
+        db.execute(
+            "INSERT INTO passports (id, farm_id, created_at, request_json, decision_json) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (
+                passport.id, passport.farm_id, passport.created_at,
+                request.model_dump_json(), decision.model_dump_json(),
+            ),
+        )
+    return passport
+
+
+def list_passports(farm_id: str) -> list[Passport]:
+    with _database() as db:
+        _ensure_farm(db, farm_id)
+        rows = db.execute(
+            "SELECT * FROM passports WHERE farm_id=? ORDER BY created_at DESC, id DESC LIMIT 100",
+            (farm_id,),
+        ).fetchall()
+    return [
+        Passport(
+            id=row["id"], farm_id=row["farm_id"], created_at=row["created_at"],
+            request=IrrigationRequest.model_validate_json(row["request_json"]),
+            decision=DecisionResponse.model_validate_json(row["decision_json"]),
+        )
+        for row in rows
+    ]

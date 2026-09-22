@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import FarmWorkspace from "./components/FarmWorkspace";
+import WeatherPanel from "./components/WeatherPanel";
 
 type Field = "root_zone_water_mm" | "field_capacity_mm" | "minimum_water_mm" |
   "estimated_daily_demand_mm" | "forecast_rain_mm" | "proposed_irrigation_mm";
@@ -40,6 +41,9 @@ export default function Home() {
   const [health, setHealth] = useState("Checking backend…");
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
+  const [activeFarmId, setActiveFarmId] = useState<string | null>(null);
+  const [passportsVersion, setPassportsVersion] = useState(0);
+  const [savedToFarm, setSavedToFarm] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -52,7 +56,7 @@ export default function Home() {
 
   async function runComparison(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError(""); setResult(null); setPending(true);
+    setError(""); setResult(null); setSavedToFarm(false); setPending(true);
     const payload: Record<string, number | null> = {};
     for (const { key } of INPUTS) {
       const raw = inputs[key].trim();
@@ -63,12 +67,16 @@ export default function Home() {
     }
     if (payload.proposed_irrigation_mm === null) payload.proposed_irrigation_mm = 10;
     try {
-      const response = await fetch(API + "/v1/decisions/irrigation", {
+      const url = activeFarmId
+        ? API + "/v1/farms/" + encodeURIComponent(activeFarmId) + "/passports/irrigation"
+        : API + "/v1/decisions/irrigation";
+      const response = await fetch(url, {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload),
       });
       const data = await response.json();
       if (!response.ok) throw new Error("Invalid data: check that water levels do not exceed capacity.");
-      setResult(data as Decision);
+      setResult((activeFarmId ? data.decision : data) as Decision);
+      if (activeFarmId) { setSavedToFarm(true); setPassportsVersion((v) => v + 1); }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not connect to backend.");
     } finally { setPending(false); }
@@ -76,7 +84,7 @@ export default function Home() {
 
   return (
     <main className="shell">
-      <nav className="nav"><span className="brand">AgriNexus <span style={{ color: "#9de6b0" }}>ProofOS</span></span><span className="tag">v0.1 · web + Android</span></nav>
+      <nav className="nav"><span className="brand">AgriNexus <span style={{ color: "#9de6b0" }}>ProofOS</span></span><span className="tag">v0.3 · web + Android</span></nav>
       <section className="hero"><div className="eyebrow">Evidence-driven agriculture · Foundation demo</div>
         <h1>Better farming begins with <em>better evidence.</em></h1>
         <p className="subtitle">Our first working slice: enter field measurements, compare two illustrative water-balance scenarios, and see exactly which evidence is missing.</p>
@@ -84,7 +92,7 @@ export default function Home() {
       <div className="notice" role="note">Prototype only: all inputs are manually supplied and unverified. The calculations are illustrative, not crop-specific agronomic advice. Do not make irrigation decisions from this demo.</div>
       <div className="status" aria-live="polite">● {health}</div>
       <section className="columns">
-        <div className="panel"><h2>Decision inputs</h2><p className="muted">Sample values are placeholders. Clear any required field to see the evidence gate.</p>
+        <div className="panel"><h2>Decision inputs</h2><p className="muted">Sample values are placeholders. Clear a required field to see the evidence gate. Select a saved demo farm below to persist a calculation passport.</p>
           <form onSubmit={runComparison}>
             <div className="form">{INPUTS.map(({ key, label }) => <label className="field" key={key}>{label}
               <input type="number" inputMode="decimal" step="any" min="0" value={inputs[key]}
@@ -97,6 +105,7 @@ export default function Home() {
           {!result && !error && <p className="muted">Run a comparison to view estimated water levels, deficits, and limitations. No automated advice is issued.</p>}
           {error && <p className="error" role="alert">{error}</p>}
           {result && <div className="result" aria-live="polite">
+            {savedToFarm && <p className="status">Saved locally as an illustrative decision passport for the selected demo farm.</p>}
             {result.status === "needs_evidence"
               ? <><strong>Additional evidence needed</strong><p className="muted">Missing: {result.missing_inputs.join(", ")}</p></>
               : <><div className="scenarios">{result.scenarios.map((s) => <div className="scenario" key={s.label}>
@@ -106,11 +115,12 @@ export default function Home() {
               </div>)}</div></>}
             <p className="muted"><strong>Limitations:</strong> {result.disclaimer}</p>
             <details><summary>Input assumptions & provisional ID</summary><ul>{result.assumptions.map((a) => <li key={a}>{a}</li>)}</ul>
-              <small>Ephemeral record: {result.passport_id}. Not saved to a database.</small></details>
+              <small>{savedToFarm ? "Locally saved passport" : "Ephemeral unsaved result"}: {result.passport_id}.</small></details>
           </div>}
         </div>
       </section>
-      <FarmWorkspace />
+      <FarmWorkspace onFarmSelected={setActiveFarmId} passportsVersion={passportsVersion} />
+      <WeatherPanel />
     </main>
   );
 }

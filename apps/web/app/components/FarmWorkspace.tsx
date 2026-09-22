@@ -2,6 +2,18 @@
 
 import { FormEvent, useEffect, useState } from "react";
 
+type Snapshot = {
+  latest_observation: Observation | null;
+  observation_status: string;
+  observation_age_hours: number | null;
+  warning: string;
+};
+type PassportSummary = {
+  id: string;
+  created_at: string;
+  decision: { status: string; scenarios: unknown[] };
+};
+
 type Farm = {
   id: string;
   name: string;
@@ -33,10 +45,15 @@ async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-export default function FarmWorkspace() {
+export default function FarmWorkspace({ onFarmSelected, passportsVersion }: {
+  onFarmSelected: (farmId: string | null) => void;
+  passportsVersion: number;
+}) {
   const [farms, setFarms] = useState<Farm[]>([]);
   const [selected, setSelected] = useState<string>("");
   const [observations, setObservations] = useState<Observation[]>([]);
+  const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
+  const [passports, setPassports] = useState<PassportSummary[]>([]);
   const [name, setName] = useState("");
   const [crop, setCrop] = useState("");
   const [region, setRegion] = useState("");
@@ -55,9 +72,20 @@ export default function FarmWorkspace() {
 
   async function selectFarm(id: string) {
     setSelected(id);
+    onFarmSelected(id);
+    setSnapshot(null);
+    setPassports([]);
     setError("");
     try {
-      setObservations(await requestJson<Observation[]>("/v1/farms/" + encodeURIComponent(id) + "/observations"));
+      const farmUrl = "/v1/farms/" + encodeURIComponent(id);
+      const [items, state, saved] = await Promise.all([
+        requestJson<Observation[]>(farmUrl + "/observations"),
+        requestJson<Snapshot>(farmUrl + "/snapshot"),
+        requestJson<PassportSummary[]>(farmUrl + "/passports"),
+      ]);
+      setObservations(items);
+      setSnapshot(state);
+      setPassports(saved);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Cannot load observations");
     }
@@ -74,7 +102,9 @@ export default function FarmWorkspace() {
       });
       setFarms((prev) => [created, ...prev]);
       setName(""); setCrop(""); setRegion(""); setArea("");
-      setSelected(created.id); setObservations([]);
+      setSelected(created.id); onFarmSelected(created.id);
+      setObservations([]); setPassports([]);
+      setSnapshot(await requestJson<Snapshot>("/v1/farms/" + encodeURIComponent(created.id) + "/snapshot"));
       setMessage("Farm saved to the local development database.");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Farm could not be saved");
@@ -97,6 +127,7 @@ export default function FarmWorkspace() {
         }
       );
       setObservations((prev) => [saved, ...prev]);
+      setSnapshot(await requestJson<Snapshot>("/v1/farms/" + encodeURIComponent(selected) + "/snapshot"));
       setMoisture(""); setNote("");
       setMessage("Manual observation saved. It is NOT sensor-verified.");
     } catch (e) {
@@ -105,6 +136,13 @@ export default function FarmWorkspace() {
       setPending(false);
     }
   }
+
+  useEffect(() => {
+    if (!selected) return;
+    requestJson<PassportSummary[]>("/v1/farms/" + encodeURIComponent(selected) + "/passports")
+      .then(setPassports)
+      .catch(() => setError("Could not refresh saved passports."));
+  }, [selected, passportsVersion]);
 
   const activeFarm = farms.find((farm) => farm.id === selected);
 
@@ -157,7 +195,16 @@ export default function FarmWorkspace() {
         </div>
       </div>
       {activeFarm && <div className="panel farm-observations">
-        <h2>Manual field observations · {activeFarm.name}</h2>
+        <h2>Farm context snapshot · {activeFarm.name}</h2>
+        {snapshot && <div className="farm-snapshot">
+          <p className="muted">Observation status: <strong>{snapshot.observation_status}</strong>
+            {snapshot.observation_age_hours !== null ? " · " + snapshot.observation_age_hours + " hours old" : ""}</p>
+          <p className="muted">Latest manually entered soil-moisture reading: {snapshot.latest_observation
+            ? snapshot.latest_observation.soil_moisture_pct + "%"
+            : "No observation recorded"}.</p>
+          <p className="muted">{snapshot.warning}</p>
+        </div>}
+        <h2>Manual field observations</h2>
         <p className="muted">These values are entered by a person, not collected or validated by sensors.</p>
         <form onSubmit={saveObservation} className="farm-observation-form">
           <label className="field">Soil moisture (%)
@@ -175,6 +222,15 @@ export default function FarmWorkspace() {
               <span>{new Date(observation.recorded_at).toLocaleString()} {observation.note ? "· " + observation.note : ""}</span>
             </div>
           ))}
+        </div>
+        <div className="farm-passports">
+          <h2>Saved decision passports</h2>
+          <p className="muted">Select this farm, then use the scenario comparison form above to save an illustrative decision record here.</p>
+          {passports.length === 0 && <p className="muted">No saved passports.</p>}
+          {passports.map((passport) => <div key={passport.id} className="farm-choice">
+            <strong>{passport.decision.status === "illustrative" ? "Illustrative scenario comparison" : "Incomplete evidence"}</strong>
+            <span>{new Date(passport.created_at).toLocaleString()} · {passport.id}</span>
+          </div>)}
         </div>
       </div>}
       {message && <p className="status" role="status">{message}</p>}
