@@ -5,12 +5,16 @@ from .engine import compare_irrigation
 from .farms import (
     Farm, FarmCreate, Observation, ObservationCreate, create_farm,
     create_observation, get_farm, list_farms, list_observations,
-    FarmSnapshot, build_farm_snapshot, Passport, save_passport, list_passports,
+    FarmSnapshot, build_farm_snapshot, Passport, list_passports,
+)
+from .passport_tracking import (
+    PassportDetail, PassportFollowUp, PassportFollowUpCreate,
+    get_passport_detail, record_passport_with_evidence, record_passport_followup,
 )
 from .schemas import DecisionResponse, IrrigationRequest
 from .weather import WeatherForecast, get_forecast
 
-app = FastAPI(title="AgriNexus ProofOS API", version="0.3.0")
+app = FastAPI(title="AgriNexus ProofOS API", version="0.4.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
@@ -70,9 +74,24 @@ def farm_snapshot(farm_id: str) -> FarmSnapshot:
 @app.post("/v1/farms/{farm_id}/passports/irrigation", response_model=Passport, status_code=201)
 def record_irrigation_passport(farm_id: str, request: IrrigationRequest) -> Passport:
     # Save a trace of the illustrative calculation, not an agronomic recommendation.
-    return save_passport(farm_id, request, compare_irrigation(request))
+    return record_passport_with_evidence(farm_id, request, compare_irrigation(request))
 
 
 @app.get("/v1/farms/{farm_id}/passports", response_model=list[Passport])
 def saved_passports(farm_id: str) -> list[Passport]:
     return list_passports(farm_id)
+
+
+@app.get("/v1/farms/{farm_id}/passports/{passport_id}", response_model=PassportDetail)
+def passport_detail(farm_id: str, passport_id: str) -> PassportDetail:
+    return get_passport_detail(farm_id, passport_id)
+
+
+@app.post(
+    "/v1/farms/{farm_id}/passports/{passport_id}/followups",
+    response_model=PassportFollowUp, status_code=201,
+)
+def add_passport_followup(
+    farm_id: str, passport_id: str, request: PassportFollowUpCreate
+) -> PassportFollowUp:
+    return record_passport_followup(farm_id, passport_id, request)

@@ -21,7 +21,7 @@ def compare_irrigation(request: IrrigationRequest) -> DecisionResponse:
             "Measurements and forecasts are user-entered and have not been verified.",
             "One illustrative daily step; rain and irrigation are assumed fully effective.",
             "No crop physiology, runoff, drainage, soil heterogeneity or forecast uncertainty is modeled.",
-            "This ID is ephemeral; passports are not yet stored in a database.",
+            "Standalone comparisons are ephemeral; only the farm passport endpoint persists a record.",
         ],
         "disclaimer": DISCLAIMER,
     }
