@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import FarmWorkspace from "./components/FarmWorkspace";
 
 type Field = "root_zone_water_mm" | "field_capacity_mm" | "minimum_water_mm" |
   "estimated_daily_demand_mm" | "forecast_rain_mm" | "proposed_irrigation_mm";
@@ -109,6 +110,7 @@ export default function Home() {
           </div>}
         </div>
       </section>
+      <FarmWorkspace />
     </main>
   );
 }
