@@ -1,0 +1,23 @@
+# Credentials, local data, generated files
+.env
+.env.*
+!.env.example
+*.keystore
+*.jks
+local.properties
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+node_modules/
+.next/
+dist/
+out/
+*.tsbuildinfo
+.gradle/
+**/build/
+.idea/
+*.iml
+.DS_Store
+Thumbs.db

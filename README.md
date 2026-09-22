@@ -1,9 +1,50 @@
 # AgriNexus ProofOS
 
-Evidence-driven agricultural decision intelligence for web and Android.
+Evidence-driven agricultural decision intelligence for **web and Android**, with a shared backend.
 
-This repository is the shared development codebase. The HackIndia Team Travex repository is a separate submission destination; do not push there until the user has tested and approved the changes.
+## Status: v0.1 foundation
 
-See docs/architecture.md for the system design and docs/ai-usage-log.md for AI-assisted development provenance.
+This repository contains a Next.js/TypeScript web demo, a Kotlin/Jetpack Compose Android scaffold, and a shared FastAPI backend. The backend has a deterministic **illustrative** irrigation-scenario comparison and missing-evidence response. This is NOT yet an AI model, real weather feed, real digital twin, validated agronomic decision tool, persistent decision passport or finished mobile release. Do not use demo numbers for agricultural decisions.
 
-**Current scope:** an explicitly illustrative irrigation scenario engine; not yet a production agronomic advisory system or a trained crop AI model.
+## Monorepo structure
+
+- apps/web: Next.js web client and sample irrigation comparison UI.
+- apps/android: Kotlin/Compose Android project and matching comparison form (Android build/emulator verification pending; Gradle wrapper needs to be generated).
+- services/api: shared FastAPI service, validation, illustrative scenario engine and automated Python tests.
+- docs: architecture, roadmap and an AI-assisted development record.
+
+## Start the API in PowerShell, at repository root
+
+    cd services/api
+    py -m venv .venv
+    .\.venv\Scripts\python.exe -m pip install -r requirements.txt
+    .\.venv\Scripts\python.exe -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+Open http://127.0.0.1:8000/docs or http://127.0.0.1:8000/health .
+
+## Start the web UI (second terminal, at repository root)
+
+    cd apps/web
+    npm install
+    npm run dev
+
+Open http://localhost:3000 . The web API URL defaults to http://127.0.0.1:8000 in development; set NEXT_PUBLIC_API_BASE_URL to override.
+
+## Backend tests (another terminal, at repository root)
+
+    cd services/api
+    .\.venv\Scripts\python.exe -m pytest -q
+
+## Android
+
+See apps/android/README.md. The Android emulator uses http://10.0.2.2:8000 to reach the local backend. Android Studio + JDK 17 + Android SDK are required. Android and web share the same endpoints, not separate business logic.
+
+## GitHub workflow
+
+This personal repository is the development source. The separate HackIndia Team Travex repository is a user-managed submission destination; do not automatically mirror or force-push to it. User reviews and tests here first, then transfers an approved snapshot into the official repo while preserving its README and LICENSE. Check organizer rules before submitting the same product to multiple events.
+
+## Limitations and roadmap
+
+Current results use manually entered, unverified quantities. Scenarios are not crop-specific and do not model soil drainage, runoff, forecast uncertainty, or plant physiology. Passport IDs are ephemeral. Next build persisted farm profiles, timestamped weather provenance, a validated agronomic calculation, a tool-using AI explanation layer, genuine evidence gating and stored outcome verification.
+
+See docs/architecture.md and docs/ai-usage-log.md. Do not claim tests, Android builds, deployment, or AI functionality not independently verified.
