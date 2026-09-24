@@ -184,3 +184,172 @@ button.farm-choice:hover{border-color:#9cbfa0;background:#f0f8ed}
 @media(max-width:760px){.sidebar{align-items:flex-start;flex-wrap:wrap;padding:18px 17px 12px;gap:12px}.side-brand{width:100%}.side-nav{width:100%;margin:0;display:grid;grid-template-columns:repeat(4,1fr);gap:3px}.side-link{flex-direction:column;text-align:center;align-items:center;padding:9px 3px;font-size:9px;gap:7px}.nav-glyph{font-size:18px}.topbar{height:auto;min-height:61px;padding:13px 17px;flex-wrap:wrap;gap:9px}.topbar-path{font-size:10px}.topbar-path>span:first-child{font-size:9px}.topbar-actions{width:100%;justify-content:space-between}.local-pill,.connection-pill{font-size:9px;padding:8px}.page-content{padding:27px 16px 18px}.hero-layout,.decision-grid,.columns{grid-template-columns:1fr}.hero-layout{gap:19px}.hero-copy{padding:10px 0}.hero-copy h1{font-size:clamp(39px,9vw,59px);letter-spacing:-2px;margin:20px 0}.hero-copy>p{font-size:13px}.hero-actions{margin-top:24px}.hero-footnote{padding-top:26px;font-size:8px;flex-wrap:wrap}.field-art{min-height:320px}.landscape{min-height:224px}.overview-strip{grid-template-columns:1fr;margin-bottom:51px}.overview-item{min-height:100px;padding:17px 24px}.overview-item+.overview-item{border-left:0;border-top:1px solid #e9eee6}.overview-item>strong{font-size:26px}.section-heading{margin-bottom:20px}.section-heading h2,.farm-workspace>h2,.weather-panel>h2{font-size:32px}.section-index{display:none}.workspace-card,.panel{padding:22px 18px}.result-placeholder{min-height:265px}.anchor-section{margin-top:53px}.form{gap:14px 10px}.farm-observation-form,.weather-form{grid-template-columns:1fr}.farm-observation-form .action,.weather-form .action{width:100%}.weather-metrics{grid-template-columns:1fr}.site-footer{flex-wrap:wrap;gap:13px;margin-top:50px}}
 @media(max-width:420px){.form,.scenarios{grid-template-columns:1fr}.field-art{min-height:290px}.field-label{right:8px;bottom:9px;font-size:8px}.hero-actions{gap:18px}.hero-footnote-separator{display:none}.topbar-path>span:first-child{letter-spacing:.4px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+
+
+/* ProofOS v0.5 — shared organic tokens and a calmer, denser working environment. */
+:root{
+  --proof-paper:#fdfcf8;--proof-surface:#fffefb;--proof-moss:#5d7052;
+  --proof-moss-dark:#435d42;--proof-clay:#c18c5d;--proof-ink:#2c2c24;
+  --proof-muted:#78786c;--proof-border:#ded8cf;--proof-stone:#f0ebe5;
+}
+.app-shell{
+  background:var(--proof-paper);color:var(--proof-ink);
+  font-family:'Nunito','DM Sans',Arial,sans-serif;
+  grid-template-columns:235px minmax(0,1fr);
+}
+.app-shell h1,.app-shell h2,.app-shell h3,.app-shell h4{font-family:'Fraunces',Georgia,serif;letter-spacing:-.6px}
+.app-shell .sidebar{background:#263f30;border-right:1px solid #405c43}
+.app-shell .side-link{border-radius:999px;transition:background .25s,transform .25s}
+.app-shell .side-link:first-child,.app-shell .side-link:hover{background:#49644b}
+.app-shell .side-note{border-radius:24px;background:#34513b}
+.app-shell .brand-mark{border-radius:50%;transform:none;background:#e5ead2}
+.app-shell .brand-copy{font-family:'Fraunces',Georgia,serif;letter-spacing:-.6px;font-weight:700}
+.app-shell .topbar{background:#fffefbf0;border-color:#e9e4dc}
+.app-shell .topbar-path a{color:#688261}
+.app-shell .topbar-path a:hover{text-decoration:underline}
+.app-shell .local-pill{border-radius:999px;background:#f7f4ed;border-color:#e7e1d8;color:#8b8c7a}
+.app-shell .connection-pill{border-radius:999px;background:#eef3e9;border-color:#dbe5d5;color:#4c7051}
+.app-shell .connection-pill.offline{background:#fff2eb;border-color:#eddbd1;color:#a35c48}
+.app-shell .page-content{padding-top:32px}
+.app-shell .hero-layout{padding-bottom:22px;grid-template-columns:minmax(0,1fr) minmax(320px,.85fr)}
+.app-shell .hero-copy{padding:26px 0 18px}
+.app-shell .hero-copy h1{font-family:'Fraunces',Georgia,serif;font-size:clamp(39px,4vw,60px);font-weight:600;line-height:1.14;letter-spacing:-1.5px;margin:21px 0 16px;color:#2b3d2c}
+.app-shell .hero-copy h1 em{color:#78936d}
+.app-shell .hero-copy>p{font-size:13px;color:#7b8174;line-height:1.8}
+.app-shell .section-kicker,.app-shell .eyebrow{color:#8a947b}
+.app-shell .kicker-line{background:#a5ad91}
+.app-shell .primary-link,.app-shell .action{background:var(--proof-moss);border-radius:999px;color:#fff;transition:background .25s,transform .25s,box-shadow .25s}
+.app-shell .primary-link:hover,.app-shell .action:hover{background:var(--proof-moss-dark);transform:translateY(-2px);box-shadow:0 6px 22px #5d705226}
+.app-shell .action:disabled{transform:none;box-shadow:none}
+.app-shell .text-link{color:#697c62}
+.app-shell .hero-footnote{color:#989789}
+.app-shell .overview-strip{background:#fffefa;border-color:var(--proof-border);border-radius:24px;margin-bottom:43px}
+.app-shell .overview-item+.overview-item{border-color:#eae3da}
+.app-shell .overview-index{color:#9f957f}
+.app-shell .overview-item>strong{font-family:'Fraunces',Georgia,serif;font-weight:600;color:#435e40;letter-spacing:-.5px}
+.app-shell .overview-item>span:last-child{color:#8f907f}
+.app-shell .section-heading h2,.app-shell .farm-workspace>h2,.app-shell .weather-panel>h2{font-size:clamp(32px,3vw,43px);font-weight:600;color:#344632}
+.app-shell .section-heading p,.app-shell .farm-workspace>.muted,.app-shell .weather-panel>.muted{font-size:13px;color:#858579;line-height:1.8}
+.app-shell .workspace-card,.app-shell .panel{background:var(--proof-surface);border:1px solid #e6dfd5;border-radius:27px;box-shadow:0 9px 32px -18px #5d705229;padding:28px}
+.app-shell .workspace-card h3,.app-shell .panel h2{color:#354735;font-weight:600}
+.app-shell .workspace-card h3{font-size:25px}
+.app-shell .panel h2{font-size:22px}
+.app-shell .card-intro,.app-shell .muted{color:#848579}
+.app-shell .field{color:#525b4d;font-size:12px}
+.app-shell .field input,.app-shell .field select,.app-shell .field textarea{
+  width:100%;background:#fffefbdc;color:#374b36;border:1px solid #dcd8ce;
+  border-radius:15px;min-height:45px;padding:12px 14px;font-family:inherit;font-size:12px;line-height:1.5;
+}
+.app-shell .field textarea{resize:vertical}
+.app-shell .field input:focus,.app-shell .field select:focus,.app-shell .field textarea:focus{outline:2px solid #a8b89b;outline-offset:2px;border-color:#a0b197;box-shadow:none}
+.app-shell .input-wrap input{padding-right:43px}
+.app-shell .evidence-badge{border-radius:999px}
+.app-shell .scenario,.app-shell .farm-snapshot{background:#f8f6ef;border:1px solid #e7e0d6;border-radius:18px}
+.app-shell .radar{border-color:#d7dfce}
+.app-shell .radar-core{background:#eef3e7;color:#688660}
+.app-shell .report-state{border-radius:17px}
+.app-shell .report-ready{background:#edf4e8}
+.app-shell .result-footer,.app-shell .report-details{border-color:#e8e2d8}
+.app-shell .farm-workspace>.eyebrow{color:#8f997d}
+.app-shell .farm-workspace>h2{margin-bottom:13px}
+.app-shell .farm-workspace>.muted{max-width:780px;margin-bottom:24px}
+.app-shell .anchor-section{margin-top:58px}
+.app-shell .farm-intro-grid{display:grid;grid-template-columns:1fr 1fr;gap:17px;align-items:stretch}
+.app-shell .farm-intro-grid .panel{min-width:0}
+.app-shell .farm-intro-grid .panel h2{font-size:24px;margin:22px 0 12px}
+.app-shell .farm-intro-grid .panel>.muted{margin-bottom:20px}
+.app-shell .farm-intro-grid .action{margin-top:20px}
+.app-shell .farm-empty{border:1px dashed #d6d0c3;border-radius:20px;background:#fbf8f2;min-height:180px;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:25px;color:#7d8071}
+.app-shell .farm-empty>span{display:grid;place-items:center;height:42px;width:42px;background:#e8ece1;color:#5d7052;border-radius:50%;font-size:20px;margin-bottom:13px}
+.app-shell .farm-empty strong{font-family:'Fraunces',Georgia,serif;color:#3b4d36;font-size:19px;font-weight:600}
+.app-shell .farm-empty p{font-size:12px;line-height:1.6;margin:7px 0 0}
+.app-shell .farm-empty a{font-weight:800;text-decoration:underline;color:#55714e}
+.app-shell .farm-list{margin-top:13px;max-height:270px;overflow-y:auto;padding-right:4px;gap:9px}
+.app-shell .farm-choice{flex-direction:row;align-items:center;gap:12px;background:#fffefa;border:1px solid #e5dfd5;border-radius:16px;padding:13px;color:#566c4e;transition:border .2s,background .2s}
+.app-shell .farm-choice.active{background:#edf3e8;border-color:#a7bb9b}
+.app-shell button.farm-choice:hover{background:#f1f4ec;border-color:#9fb295}
+.app-shell .farm-choice-leading{display:grid;place-items:center;background:#e9eee3;color:#63825b;border-radius:50%;height:34px;width:34px;flex:none;font-size:17px}
+.app-shell .farm-choice-copy{display:grid;gap:3px;min-width:0;flex:1}
+.app-shell .farm-choice-copy strong{font-size:12px;overflow-wrap:anywhere}
+.app-shell .farm-choice-copy small{color:#8c8d7e;font-size:10px;line-height:1.5}
+.app-shell .farm-choice-end{font-size:9px;white-space:nowrap;font-weight:800;color:#78916d}
+.app-shell .farm-active-banner{font-size:11px;margin-top:16px;padding:13px 15px;border-radius:16px;background:#e9f0e4;color:#526d4c;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.app-shell .farm-active-banner .lp-live-dot{margin-right:3px;background:#73996c}
+.app-shell .farm-active-banner a{font-size:11px;font-weight:800;margin-left:auto;text-decoration:underline}
+.app-shell .farm-context-section{margin-top:23px}
+.app-shell .farm-context-banner{border-radius:26px;display:flex;gap:18px;align-items:center;justify-content:space-between;padding:25px 30px;background:#e7e8d9;border:1px solid #dcded0;margin-bottom:18px}
+.app-shell .farm-context-banner h3{font-family:'Fraunces',Georgia,serif;color:#3d533c;font-size:31px;margin:6px 0}
+.app-shell .farm-context-banner p{font-size:12px;color:#687967;margin:0}
+.app-shell .farm-context-label{font-weight:800;font-size:9px;letter-spacing:1.3px;color:#82957c}
+.app-shell .farm-context-grid{display:grid;grid-template-columns:1fr 1fr;gap:17px;align-items:start}
+.app-shell .farm-context-card h2{font-size:24px;margin:18px 0 11px}
+.app-shell .farm-context-card>.muted{margin-bottom:19px}
+.app-shell .farm-context-card .farm-snapshot{padding:21px 22px;margin:15px 0 21px;background:#eef2e8;border-color:#e0e7d7}
+.app-shell .farm-snapshot-title{font-size:9px;letter-spacing:1.5px;color:#79906f;font-weight:800}
+.app-shell .farm-snapshot>strong{font-family:'Fraunces',Georgia,serif;font-size:26px;display:block;color:#405c42;margin:7px 0}
+.app-shell .farm-snapshot p{font-size:11px;line-height:1.6;color:#778374;margin:0}
+.app-shell .farm-snapshot small{display:block;margin-top:10px;color:#91a089;font-size:10px}
+.app-shell .farm-observation-form{grid-template-columns:1fr 1fr;gap:13px;align-items:end}
+.app-shell .farm-observation-form .action{grid-column:1/-1;margin-top:0;justify-self:start;padding:13px 26px;min-height:45px}
+.app-shell .observation-log{margin-top:27px;border-top:1px solid #e9e3d8;padding-top:20px}
+.app-shell .observation-log h3,.app-shell .followup-section h4{font-size:19px;font-weight:600;color:#405342;margin:0 0 14px}
+.app-shell .observation-entry{display:flex;gap:12px;padding:13px 0;border-bottom:1px solid #f0ebe3}
+.app-shell .observation-bullet{height:9px;width:9px;border-radius:50%;background:#9cb39a;box-shadow:0 0 0 4px #eef1e7;flex:none;margin:6px 2px}
+.app-shell .observation-entry strong{font-size:12px;color:#4d6749}
+.app-shell .observation-entry p{font-size:11px;color:#888c7e;margin:5px 0 0;overflow-wrap:anywhere;line-height:1.65}
+.app-shell .passport-list{display:grid;gap:8px}
+.app-shell .passport-choice{display:flex;text-align:left;width:100%;align-items:center;gap:12px;padding:15px 14px;border:1px solid #e6e0d5;border-radius:17px;background:#fffdf8;color:#576f53;transition:background .2s,border-color .2s}
+.app-shell .passport-choice:hover,.app-shell .passport-choice.active{background:#edf2e8;border-color:#9cad91}
+.app-shell .passport-index{flex:none;display:grid;place-items:center;font-size:11px;font-weight:800;border-radius:50%;background:#ebefe5;height:34px;width:34px}
+.app-shell .passport-choice>span:nth-child(2){display:grid;gap:5px;flex:1;min-width:0}
+.app-shell .passport-choice strong{font-size:12px}
+.app-shell .passport-choice small{font-size:10px;color:#939585}
+.app-shell .passport-arrow{font-size:19px}
+.app-shell .passport-detail{border:1px solid #d9e1d0;border-radius:23px;padding:21px;background:#fcfbf6;margin-top:17px;overflow-wrap:anywhere}
+.app-shell .passport-detail-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.app-shell .passport-detail-heading h3{font-size:25px;margin:8px 0 2px}
+.app-shell .passport-detail .quiet-button{padding:7px}
+.app-shell .passport-id{font-size:10px;color:#8d8a7c;overflow-wrap:anywhere;margin:6px 0}
+.app-shell .passport-meta{font-size:10px;font-weight:800;color:#75856c}
+.app-shell .passport-detail h4{font-family:'Fraunces',Georgia,serif;color:#405241;font-size:20px;font-weight:600;margin:25px 0 12px}
+.app-shell .passport-scenario-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:19px}
+.app-shell .passport-scenario-grid>div{background:#eff3e9;border-radius:16px;padding:15px 12px;min-width:0}
+.app-shell .passport-scenario-grid small,.app-shell .passport-scenario-grid span{font-size:10px;color:#7c8976;line-height:1.6;display:block}
+.app-shell .passport-scenario-grid strong{font-family:'Fraunces',Georgia,serif;font-size:24px;color:#4b6546;display:block;margin:9px 0}
+.app-shell .passport-scenario-grid p{border-top:1px solid #dbe4d4;padding-top:11px;font-size:10px;line-height:1.7;color:#7a8574}
+.app-shell .passport-provenance{display:grid;gap:0;border:1px solid #e8e2d9;border-radius:14px;overflow:hidden;margin:12px 0}
+.app-shell .passport-provenance>div{display:flex;align-items:center;justify-content:space-between;gap:13px;padding:10px 13px;background:#fffefa;font-size:10px;line-height:1.5}
+.app-shell .passport-provenance>div+div{border-top:1px solid #ece6df}
+.app-shell .passport-provenance strong{font-size:10px;color:#617951;white-space:nowrap;text-align:right}
+.app-shell .passport-detail .report-details{font-size:11px;line-height:1.7}
+.app-shell .followup-section{border-top:1px solid #e8e2d7;margin-top:25px;padding-top:7px}
+.app-shell .followup-section>.muted{margin-bottom:18px}
+.app-shell .followup-form{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.app-shell .followup-note,.app-shell .followup-form>.action{grid-column:1/-1}
+.app-shell .followup-form>.action{justify-self:start;padding:13px 24px;margin:2px 0 0}
+.app-shell .followup-history{margin-top:23px}
+.app-shell .followup-entry{border:1px solid #e8e1d7;border-radius:14px;padding:13px;margin-bottom:8px;font-size:11px;background:#fffefa;overflow-wrap:anywhere}
+.app-shell .followup-entry strong,.app-shell .followup-entry small{display:block}
+.app-shell .followup-entry strong{color:#536d50}
+.app-shell .followup-entry small{margin-top:4px;color:#9a9d8f}
+.app-shell .followup-entry p{margin:8px 0 0;line-height:1.65;color:#7d8674}
+.app-shell .workspace-message{padding:14px 17px;border-radius:16px;background:#e9f2e6;color:#456a43;font-weight:800;font-size:12px;margin-top:14px}
+.app-shell .workspace-error{padding:13px 16px;border:1px solid #f0d5c9;background:#fff3ee;border-radius:16px;color:#a45a42;font-size:12px;margin-top:14px}
+.app-shell .workspace-error p{margin:0}
+.app-shell .workspace-error .quiet-button{color:#9d553b;text-decoration:underline}
+.app-shell .weather-panel{background:#fffefa}
+.app-shell .weather-panel .result{background:#faf9f4;border-radius:18px;padding:18px;margin-top:18px}
+.app-shell .weather-panel .weather-metrics>div{border-radius:15px;background:#eef2e8;border-color:#e3e6db}
+.app-shell .site-footer{border-color:#e8e1d8}
+@media(max-width:1270px){.app-shell .farm-intro-grid,.app-shell .farm-context-grid{grid-template-columns:1fr}.app-shell .hero-layout{grid-template-columns:minmax(0,1fr) minmax(260px,.9fr)}}
+@media(max-width:1020px){.app-shell{display:block}.app-shell .hero-layout{grid-template-columns:minmax(0,1fr) minmax(260px,.85fr)}}
+@media(max-width:760px){
+  .app-shell .page-content{padding-top:20px}.app-shell .hero-layout{grid-template-columns:1fr}.app-shell .hero-copy{padding:8px 0}
+  .app-shell .hero-copy h1{font-size:clamp(37px,9vw,48px)}.app-shell .overview-strip{margin-bottom:31px}
+  .app-shell .workspace-card,.app-shell .panel{padding:22px 17px;border-radius:23px}.app-shell .anchor-section{margin-top:41px}
+  .app-shell .farm-context-banner{padding:19px;flex-wrap:wrap;border-radius:20px}.app-shell .farm-context-banner h3{font-size:25px}
+  .app-shell .farm-observation-form,.app-shell .followup-form{grid-template-columns:1fr}
+  .app-shell .farm-observation-form .action,.app-shell .followup-form>.action{grid-column:1/-1;width:100%}
+  .app-shell .farm-snapshot{padding:16px}.app-shell .passport-detail{padding:17px 12px}.app-shell .passport-scenario-grid{grid-template-columns:1fr}
+  .app-shell .farm-choice-end{font-size:8px}.app-shell .farm-active-banner a{margin-left:0}
+}
