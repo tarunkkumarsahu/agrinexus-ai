@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Nunito:wght@400;500;600;700;800&display=swap');
 
 /* Landing-specific system. Existing workspace styles remain unchanged. */
-.lp-page{--lp-bg:#fdfcf8;--lp-ink:#2c2c24;--lp-moss:#5d7052;--lp-moss-deep:#40543d;--lp-clay:#c18c5d;--lp-sand:#e6dccd;--lp-muted:#78786c;--lp-border:#ded8cf;background:var(--lp-bg);color:var(--lp-ink);font-family:'Nunito',Arial,sans-serif;font-size:15px;overflow:hidden;isolation:isolate}
+.lp-page{--lp-bg:var(--proof-paper);--lp-ink:var(--proof-ink);--lp-moss:var(--proof-moss);--lp-moss-deep:var(--proof-moss-dark);--lp-clay:var(--proof-clay);--lp-sand:var(--proof-sand,#e6dccd);--lp-muted:var(--proof-muted);--lp-border:var(--proof-border);background:var(--lp-bg);color:var(--lp-ink);font-family:'Nunito',Arial,sans-serif;font-size:15px;overflow:hidden;isolation:isolate}
 .lp-page::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:20;opacity:.035;mix-blend-mode:multiply;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.9'/%3E%3C/svg%3E")}
 .lp-page h1,.lp-page h2,.lp-page h3,.lp-page p{margin-top:0}
 .lp-page h1,.lp-page h2,.lp-page h3{font-family:'Fraunces',Georgia,serif;font-weight:600}
