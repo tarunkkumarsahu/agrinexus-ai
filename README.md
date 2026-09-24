@@ -2,13 +2,13 @@
 
 Evidence-driven agricultural decision intelligence for **web and Android**, with a shared backend.
 
-## Status: v0.4 local development prototype
+## Status: v0.5 local UI prototype (API v0.4)
 
-This repository contains a Next.js/TypeScript web demo, a Kotlin/Jetpack Compose Android scaffold, and a shared FastAPI backend. The backend has a deterministic **illustrative** irrigation-scenario comparison and missing-evidence response, local SQLite farm/observation records, a provenance-labeled weather proxy, a timestamped farm-context snapshot, and locally persisted example decision passports with a frozen evidence snapshot and optional manually recorded follow-ups. A real provider weather forecast can be fetched, but this is NOT yet an AI model, scientifically validated digital twin, actionable agronomic decision tool, verified outcome record or finished mobile release. Forecasts are displayed separately and are not automatically used in irrigation calculations. Do not use demo numbers for agricultural decisions.
+This repository contains a two-route Next.js/TypeScript experience (organic landing page at / and the connected working workspace at /workspace), a Kotlin/Jetpack Compose Android scaffold, and a shared FastAPI backend. The backend has a deterministic **illustrative** irrigation-scenario comparison and missing-evidence response, local SQLite farm/observation records, a provenance-labeled weather proxy, a timestamped farm-context snapshot, and locally persisted example decision passports with a frozen evidence snapshot and optional manually recorded follow-ups. A real provider weather forecast can be fetched, but this is NOT yet an AI model, scientifically validated digital twin, actionable agronomic decision tool, verified outcome record or finished mobile release. Forecasts are displayed separately and are not automatically used in irrigation calculations. Do not use demo numbers for agricultural decisions.
 
 ## Monorepo structure
 
-- apps/web: Next.js web client and sample irrigation comparison UI.
+- apps/web: Next.js public-facing product explanation, responsive working workspace, illustrative scenario comparison, farm/observation management, saved passport detail/follow-up UI, and weather source panel. Automated browser E2E tests cover the main demonstration workflow.
 - apps/android: Kotlin/Compose Android project and matching comparison form (Android build/emulator verification pending; Gradle wrapper needs to be generated).
 - services/api: shared FastAPI service, validation, illustrative scenario engine and automated Python tests.
 - docs: architecture, roadmap and an AI-assisted development record.
@@ -28,12 +28,16 @@ Open http://127.0.0.1:8000/docs or http://127.0.0.1:8000/health .
     npm install
     npm run dev
 
-Open http://localhost:3000 . The web API URL defaults to http://127.0.0.1:8000 in development; set NEXT_PUBLIC_API_BASE_URL to override.
+Open http://localhost:3000 for the landing page and http://localhost:3000/workspace for the working prototype. The web API URL defaults to http://127.0.0.1:8000 in development; set NEXT_PUBLIC_API_BASE_URL to override.
 
 ## Backend tests (another terminal, at repository root)
 
     cd services/api
     .\.venv\Scripts\python.exe -m pytest -q
+
+## Browser checks & product walkthrough
+
+Run `npm run build` from `apps/web` for the production build. For desktop/mobile and real API-connected browser smoke tests, run `npx playwright install chromium` then `npm run test:e2e` from `apps/web` after installing the backend Python requirements. Browser tests reuse local servers if present and otherwise start the dev services; test only with non-private sample data. See [docs/demo-guide.md](docs/demo-guide.md) for the exact Windows setup, full walkthrough, evidence-origin caveats and manual review checklist.
 
 ## Android
 
