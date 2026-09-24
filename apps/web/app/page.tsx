@@ -135,7 +135,7 @@ export default function LandingPage() {
                 <span className="lp-feature-index">{feature.index} / {feature.detail}</span>
                 <h3>{feature.title}</h3>
                 <p>{feature.description}</p>
-                <Link href={index === 0 ? "/workspace#farms" : index === 1 ? "/workspace#decision-lab" : "/workspace#farms"} className="lp-feature-link">Explore in prototype <span aria-hidden="true">↗</span></Link>
+                <Link href={index === 0 ? "/workspace/farms" : index === 1 ? "/workspace/decisions" : "/workspace/passports"} className="lp-feature-link">Explore in prototype <span aria-hidden="true">↗</span></Link>
               </article>
             ))}
           </div>
@@ -200,7 +200,7 @@ export default function LandingPage() {
         </section>
 
         <section className="lp-principle">
-          <div className="lp-principle-inner lp-container"><span className="lp-eyebrow">THE PROOFOS PRINCIPLE</span><h2>Not another prediction.<br /><em>A better way to ask questions.</em></h2><p>Transparent assumptions. Clear provenance. Honest limitations. Built for exploration, not for real-world irrigation instructions.</p><Link href="/workspace#decision-lab" className="lp-button lp-button-light">Explore the decision lab <span aria-hidden="true">↗</span></Link></div>
+          <div className="lp-principle-inner lp-container"><span className="lp-eyebrow">THE PROOFOS PRINCIPLE</span><h2>Not another prediction.<br /><em>A better way to ask questions.</em></h2><p>Transparent assumptions. Clear provenance. Honest limitations. Built for exploration, not for real-world irrigation instructions.</p><Link href="/workspace/decisions" className="lp-button lp-button-light">Explore the decision lab <span aria-hidden="true">↗</span></Link></div>
         </section>
 
         <footer className="lp-footer lp-container">
