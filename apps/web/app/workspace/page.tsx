@@ -132,6 +132,7 @@ export default function Home() {
 
   return (
     <main className="app-shell">
+      <a className="workspace-skip" href="#farms">Skip to farm workspace</a>
       <aside className="sidebar" aria-label="Workspace navigation">
         <a href="#overview" className="side-brand" aria-label="AgriNexus ProofOS overview">
           <span className="brand-mark" aria-hidden="true"><span /></span>
@@ -141,8 +142,8 @@ export default function Home() {
         <div className="side-group-label">WORKSPACE</div>
         <nav className="side-nav" aria-label="On this page">
           <a href="#overview" className="side-link"><span className="nav-glyph">◈</span> Overview</a>
-          <a href="#decision-lab" className="side-link"><span className="nav-glyph">▦</span> Decision lab</a>
           <a href="#farms" className="side-link"><span className="nav-glyph">◇</span> Farm workspace</a>
+          <a href="#decision-lab" className="side-link"><span className="nav-glyph">▦</span> Decision lab</a>
           <a href="#weather" className="side-link"><span className="nav-glyph">☼</span> Weather evidence</a>
         </nav>
 
@@ -169,16 +170,18 @@ export default function Home() {
         </header>
 
         <div className="page-content" id="overview">
+          {health === "offline" && <div className="workspace-api-banner" role="alert"><span>Local backend is offline. Farm records, weather and comparisons require the API on port 8000.</span><button type="button" onClick={() => void retryConnection()}>Retry connection ↗</button></div>}
+          {health === "checking" && <div className="workspace-api-banner checking" role="status">Checking the local backend connection…</div>}
           <section className="hero-layout" aria-labelledby="hero-heading">
             <div className="hero-copy">
               <div className="section-kicker"><span className="kicker-line" /> THE FIELD COMMAND CENTER</div>
               <h1 id="hero-heading">A clearer view<br />of <em>every decision.</em></h1>
               <p>Bring observations, assumptions and scenario comparisons into one calm workspace. Understand what the evidence says—and what it cannot say yet.</p>
               <div className="hero-actions">
-                <a className="primary-link" href="#decision-lab">Open decision lab <span aria-hidden="true">↗</span></a>
-                <a className="text-link" href="#farms">Explore farm records <span aria-hidden="true">→</span></a>
+                <a className="primary-link" href="#farms">Start with a farm <span aria-hidden="true">↗</span></a>
+                <a className="text-link" href="#decision-lab">Try a scenario <span aria-hidden="true">→</span></a>
               </div>
-              <div className="hero-footnote"><span className="footnote-dot" /> PROTOTYPE PREVIEW <span className="hero-footnote-separator">—</span> NO AUTOMATED FARMING ADVICE</div>
+              <div className="hero-footnote"><span className="footnote-dot" /> LOCAL WORKING PROTOTYPE <span className="hero-footnote-separator">—</span> NO AUTOMATED FARMING ADVICE</div>
             </div>
 
             <div className="field-art" role="img" aria-label="Conceptual illustration of a cultivated field, not live satellite imagery or measured data">
@@ -203,19 +206,23 @@ export default function Home() {
           <section className="overview-strip" aria-label="Prototype overview">
             <div className="overview-item"><span className="overview-index">01 / EVIDENCE</span><strong>{availableInputs}<span className="overview-unit">/5</span></strong><span>Required scenario inputs present</span></div>
             <div className="overview-item"><span className="overview-index">02 / ENGINE</span><strong className="overview-word">Transparent</strong><span>Illustrative water-balance model</span></div>
-            <div className="overview-item"><span className="overview-index">03 / PROVENANCE</span><strong className="overview-word">{activeFarmId ? "Farm selected" : "Manual demo"}</strong><span>{activeFarmId ? "New passports save to the selected farm" : "Select a farm to save decision passports"}</span></div>
+            <div className="overview-item"><span className="overview-index">03 / RECORD</span><strong className="overview-word">{activeFarmId ? "Farm selected" : "No active farm"}</strong><span>{activeFarmId ? "New passports are saved locally" : "Create or select a demo farm to save a passport"}</span></div>
           </section>
+
+          <div id="farms" className="anchor-section"><FarmWorkspace onFarmSelected={setActiveFarmId} passportsVersion={passportsVersion} /></div>
+
+          <div className="workspace-journey" aria-label="Your prototype workflow"><span>01 <strong>Record a farm</strong></span><span aria-hidden="true">→</span><span>02 <strong>Compare scenarios</strong></span><span aria-hidden="true">→</span><span>03 <strong>Inspect the passport</strong></span><span aria-hidden="true">→</span><span>04 <strong>Record a follow-up</strong></span></div>
 
           <section id="decision-lab" className="workspace-section" aria-labelledby="decision-heading">
             <div className="section-heading">
-              <div><div className="section-kicker"><span className="kicker-line" /> WORKSPACE 01</div><h2 id="decision-heading">Decision lab<span className="heading-period">.</span></h2><p>Compare two water-balance scenarios with the inputs you provide. Missing evidence is flagged instead of silently assumed.</p></div>
+              <div><div className="section-kicker"><span className="kicker-line" /> WORKSPACE 02 / SCENARIO STUDY</div><h2 id="decision-heading">Decision lab<span className="heading-period">.</span></h2><p>Compare two water-balance scenarios with the inputs you provide. Missing evidence is flagged instead of silently assumed.</p></div>
               <span className="section-index">01 — 03</span>
             </div>
             <div className="decision-grid">
               <div className="workspace-card input-card">
                 <div className="card-topline"><span>SCENARIO PARAMETERS</span><span className={"evidence-badge " + (scenarioReady ? "ready" : "")}>{availableInputs} / 5 REQUIRED</span></div>
                 <h3>Start with what you know.</h3>
-                <p className="card-intro">Illustrative values are prefilled for review. Change or clear any value to test the evidence gate.</p>
+                <p className="card-intro">Sample inputs are prefilled for demonstration, not measured at your farm. Change or clear any value to test the evidence gate.</p>
                 <form onSubmit={runComparison}>
                   <div className="form">
                     {INPUTS.map(({ key, label, hint }, index) => (
@@ -228,21 +235,21 @@ export default function Home() {
                     ))}
                   </div>
                   <div className="form-footer">
-                    <button className="action" disabled={pending} type="submit">{pending ? "Comparing…" : "Compare scenarios"} <span aria-hidden="true">↗</span></button>
+                    <button className="action" disabled={pending} type="submit">{pending ? "Comparing…" : activeFarmId ? "Compare & save passport" : "Compare (unsaved)"} <span aria-hidden="true">↗</span></button>
                     <button className="quiet-button" type="button" onClick={() => { setInputs({ ...SAMPLE }); setResult(null); setError(""); setSavedToFarm(false); }}>Restore sample</button>
                   </div>
-                  <p className="input-disclaimer">Manual, unverified input. Calculations are illustrative—not agronomic recommendations.</p>
+                  <p className="input-disclaimer">Sample values are placeholders, not observations. Only farm-linked results are persisted. Calculations are illustrative—not agronomic recommendations.</p>
                 </form>
               </div>
 
               <div className="workspace-card result-card">
-                <div className="card-topline"><span>DECISION PASSPORT</span><span className="result-counter">EXPLAINABLE OUTPUT</span></div>
+                <div className="card-topline"><span>DECISION PASSPORT</span><span className="result-counter">TRACEABLE OUTPUT</span></div>
                 <h3>Evidence, not guesswork.</h3>
-                <p className="card-intro">{activeFarmId ? "A comparison will be saved to your selected demo farm." : "Select a demo farm below if you want to save this comparison locally."}</p>
+                <p className="card-intro">{activeFarmId ? "A comparison will be saved to your selected demo farm, with its frozen input provenance." : "No farm selected: this comparison will be temporary. Select a demo farm above to save a passport."}</p>
                 {error && <p className="error" role="alert">{error}</p>}
                 {!result && !error && <div className="result-placeholder">
                   <div className="radar" aria-hidden="true"><span className="radar-core">◎</span><span className="radar-node radar-n1" /><span className="radar-node radar-n2" /><span className="radar-node radar-n3" /></div>
-                  <span className="placeholder-label">AWAITING COMPARISON</span>
+                  <span className="placeholder-label">{activeFarmId ? "FARM SELECTED · READY TO COMPARE" : "TEMPORARY COMPARISON MODE"}</span>
                   <strong>Your evidence report begins here.</strong>
                   <p>Submit your parameters to see both scenarios, missing evidence and the assumptions behind the calculation.</p>
                 </div>}
@@ -272,7 +279,6 @@ export default function Home() {
             </div>
           </section>
 
-          <div id="farms" className="anchor-section"><FarmWorkspace onFarmSelected={setActiveFarmId} passportsVersion={passportsVersion} /></div>
           <div id="weather" className="anchor-section"><WeatherPanel /></div>
 
           <footer className="site-footer"><span>AGRINEXUS / PROOFOS</span><p>Local prototype. Manual data is unverified. Never rely on illustrative outputs for real irrigation decisions.</p><a href="#overview">Back to top ↑</a></footer>
