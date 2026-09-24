@@ -27,7 +27,7 @@ test("small-screen navigation stays usable", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Open navigation" })).toBeVisible();
   await page.goto("/workspace");
   await page.getByRole("button", { name: "Open workspace menu" }).click();
-  await page.getByRole("link", { name: "Weather evidence" }).click();
+  await page.getByRole("navigation", { name: "Pages" }).getByRole("link", { name: "Weather evidence" }).click();
   await expect(page).toHaveURL(/\/workspace\/weather/);
   await expect(page.getByRole("button", { name: "Open workspace menu" })).toBeVisible();
   await expect(page.locator("body")).toHaveJSProperty("scrollWidth", 390);
