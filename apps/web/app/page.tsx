@@ -1,283 +1,214 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
-import FarmWorkspace from "./components/FarmWorkspace";
-import WeatherPanel from "./components/WeatherPanel";
+import { useState } from "react";
+import type { ReactNode } from "react";
+import Link from "next/link";
+import "./landing.css";
 
-type Field =
-  | "root_zone_water_mm"
-  | "field_capacity_mm"
-  | "minimum_water_mm"
-  | "estimated_daily_demand_mm"
-  | "forecast_rain_mm"
-  | "proposed_irrigation_mm";
-
-type Scenario = {
-  label: string;
-  applied_irrigation_mm: number;
-  estimated_end_water_mm: number;
-  estimated_deficit_to_minimum_mm: number;
-  estimated_overflow_mm: number;
-};
-
-type Decision = {
-  passport_id: string;
-  status: "needs_evidence" | "illustrative";
-  missing_inputs: string[];
-  scenarios: Scenario[];
-  assumptions: string[];
-  disclaimer: string;
-};
-
-const API = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000";
-
-const INPUTS: { key: Field; label: string; hint: string }[] = [
-  { key: "root_zone_water_mm", label: "Current root-zone water", hint: "mm · manual estimate" },
-  { key: "field_capacity_mm", label: "Field water capacity", hint: "mm · user supplied" },
-  { key: "minimum_water_mm", label: "Minimum water threshold", hint: "mm · user supplied" },
-  { key: "estimated_daily_demand_mm", label: "Estimated daily demand", hint: "mm · manual estimate" },
-  { key: "forecast_rain_mm", label: "Forecast rainfall", hint: "mm · manually entered" },
-  { key: "proposed_irrigation_mm", label: "Proposed irrigation", hint: "mm · comparison input" },
+const capabilities = [
+  {
+    index: "01",
+    icon: "✳",
+    title: "Collect the context.",
+    description: "Keep demo farm profiles and manually entered observations together, with clear timestamps and source labels.",
+    detail: "FARM RECORDS",
+  },
+  {
+    index: "02",
+    icon: "◈",
+    title: "Explore the possibilities.",
+    description: "Compare illustrative water-balance scenarios. See missing inputs before drawing conclusions.",
+    detail: "DECISION LAB",
+  },
+  {
+    index: "03",
+    icon: "▤",
+    title: "Preserve the reasoning.",
+    description: "Save a decision passport with its input provenance, assumptions, and optional self-reported follow-ups.",
+    detail: "EVIDENCE PASSPORT",
+  },
 ];
 
-const SAMPLE: Record<Field, string> = {
-  root_zone_water_mm: "35",
-  field_capacity_mm: "60",
-  minimum_water_mm: "25",
-  estimated_daily_demand_mm: "7",
-  forecast_rain_mm: "2",
-  proposed_irrigation_mm: "10",
-};
+function Brand({ light = false }: { light?: boolean }) {
+  return (
+    <Link className={"lp-brand" + (light ? " lp-brand-light" : "")} href="/" aria-label="AgriNexus home">
+      <span className="lp-brand-icon" aria-hidden="true">
+        <svg viewBox="0 0 36 36" width="22" height="22" fill="none"><path d="M9 26c7 0 17-6 18-18-12 1-18 8-18 18Z" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"/><path d="M10 26c3-7 8-11 15-15M10 26v4" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round"/></svg>
+      </span>
+      <span>agrinexus<span className="lp-brand-period">.</span></span>
+    </Link>
+  );
+}
 
-export default function Home() {
-  const [inputs, setInputs] = useState<Record<Field, string>>({ ...SAMPLE });
-  const [result, setResult] = useState<Decision | null>(null);
-  const [health, setHealth] = useState<"checking" | "online" | "offline">("checking");
-  const [error, setError] = useState("");
-  const [pending, setPending] = useState(false);
-  const [activeFarmId, setActiveFarmId] = useState<string | null>(null);
-  const [passportsVersion, setPassportsVersion] = useState(0);
-  const [savedToFarm, setSavedToFarm] = useState(false);
+function FieldLandscape() {
+  return (
+    <div className="lp-landscape" aria-label="Stylized agricultural landscape; an illustration, not live field imagery" role="img">
+      <svg className="lp-landscape-svg" viewBox="0 0 1080 510" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs>
+          <linearGradient id="lp-sky" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#e4e5c9"/><stop offset=".53" stopColor="#bbc9a4"/><stop offset="1" stopColor="#779476"/></linearGradient>
+          <linearGradient id="lp-field" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#71956d"/><stop offset="1" stopColor="#314f36"/></linearGradient>
+          <clipPath id="lp-field-mask"><path d="M0 265C154 229 238 287 373 252c140-35 245-15 342 6 127 26 236-30 365-18v270H0Z"/></clipPath>
+        </defs>
+        <rect width="1080" height="510" fill="url(#lp-sky)"/>
+        <circle cx="823" cy="103" r="68" fill="#f6f1d7" opacity=".7"/>
+        <path d="M0 273c168-132 271-86 387-117 140-38 278-127 430-54 100 49 180 70 263 39v369H0Z" fill="#94a789" opacity=".72"/>
+        <path d="M0 286c125-47 204-46 340-82 172-45 287 45 436-9 100-36 207-30 304-14v329H0Z" fill="#647f62"/>
+        <path d="M0 265C154 229 238 287 373 252c140-35 245-15 342 6 127 26 236-30 365-18v270H0Z" fill="url(#lp-field)"/>
+        <g clipPath="url(#lp-field-mask)" fill="none">
+          <path d="M-170 495Q290 315 1220 256M-155 530Q290 339 1220 278M-137 562Q290 360 1220 302M-105 604Q290 386 1220 326M-70 644Q290 416 1220 348M-30 688Q290 445 1220 372M10 744Q290 478 1220 396" stroke="#aec29a" strokeWidth="14" opacity=".86"/>
+          <path d="M-170 495Q290 315 1220 256M-155 530Q290 339 1220 278M-137 562Q290 360 1220 302M-105 604Q290 386 1220 326M-70 644Q290 416 1220 348M-30 688Q290 445 1220 372M10 744Q290 478 1220 396" stroke="#294d37" strokeWidth="3" opacity=".55" transform="translate(0 10)"/>
+        </g>
+        <path d="M0 370c200-24 286-8 412-28 162-25 318-83 668-48" stroke="#e6e4c9" strokeWidth="1.5" strokeDasharray="6 9" fill="none" opacity=".55"/>
+        <circle cx="495" cy="305" r="18" fill="#f5f3d8" opacity=".27"/><circle cx="495" cy="305" r="8" fill="#f4f1d6"/><circle cx="495" cy="305" r="4" fill="#55765c"/>
+        <circle cx="765" cy="263" r="14" fill="#f5f3d8" opacity=".3"/><circle cx="765" cy="263" r="6" fill="#f4f1d6"/>
+      </svg>
+      <div className="lp-landscape-label"><span className="lp-live-dot" /> FIELD VIEW / CONCEPT ART</div>
+      <div className="lp-landscape-coordinate">EVIDENCE BEFORE PREDICTION <span>↗</span></div>
+    </div>
+  );
+}
 
-  useEffect(() => {
-    const controller = new AbortController();
-    fetch(API + "/health", { signal: controller.signal })
-      .then((response) => {
-        if (!response.ok) throw new Error("API unavailable");
-        setHealth("online");
-      })
-      .catch(() => {
-        if (!controller.signal.aborted) setHealth("offline");
-      });
-    return () => controller.abort();
-  }, []);
+function SectionTitle({ eyebrow, children, description, centered = false }: {
+  eyebrow: string; children: ReactNode; description?: string; centered?: boolean;
+}) {
+  return (
+    <div className={"lp-section-title" + (centered ? " lp-section-title-centered" : "")}>
+      <span className="lp-eyebrow"><span className="lp-eyebrow-dot" />{eyebrow}</span>
+      <h2>{children}</h2>
+      {description && <p>{description}</p>}
+    </div>
+  );
+}
 
-  async function retryConnection() {
-    setHealth("checking");
-    try {
-      const response = await fetch(API + "/health");
-      setHealth(response.ok ? "online" : "offline");
-    } catch {
-      setHealth("offline");
-    }
-  }
+export default function LandingPage() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [preview, setPreview] = useState<"inputs" | "comparison" | "passport">("inputs");
 
-  async function runComparison(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setError("");
-    setResult(null);
-    setSavedToFarm(false);
-    setPending(true);
-
-    const payload: Record<string, number | null> = {};
-    for (const { key } of INPUTS) {
-      const raw = inputs[key].trim();
-      payload[key] = raw === "" ? null : Number(raw);
-      if (raw !== "" && !Number.isFinite(payload[key])) {
-        setError("Please enter valid numeric values.");
-        setPending(false);
-        return;
-      }
-    }
-    if (payload.proposed_irrigation_mm === null) payload.proposed_irrigation_mm = 10;
-
-    try {
-      const url = activeFarmId
-        ? API + "/v1/farms/" + encodeURIComponent(activeFarmId) + "/passports/irrigation"
-        : API + "/v1/decisions/irrigation";
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        const detail = typeof data?.detail === "string" ? data.detail : "Check the entered water levels and capacity.";
-        throw new Error(detail);
-      }
-      setResult((activeFarmId ? data.decision : data) as Decision);
-      if (activeFarmId) {
-        setSavedToFarm(true);
-        setPassportsVersion((version) => version + 1);
-      }
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "Could not connect to the local API.");
-    } finally {
-      setPending(false);
-    }
-  }
-
-  const availableInputs = INPUTS.slice(0, 5).filter(({ key }) => inputs[key].trim() !== "").length;
-  const scenarioReady = availableInputs === 5;
+  const closeMenu = () => setMenuOpen(false);
 
   return (
-    <main className="app-shell">
-      <aside className="sidebar" aria-label="Workspace navigation">
-        <a href="#overview" className="side-brand" aria-label="AgriNexus ProofOS overview">
-          <span className="brand-mark" aria-hidden="true"><span /></span>
-          <span className="brand-copy">agrinexus<small>PROOF OS / LAB</small></span>
-        </a>
-
-        <div className="side-group-label">WORKSPACE</div>
-        <nav className="side-nav" aria-label="On this page">
-          <a href="#overview" className="side-link"><span className="nav-glyph">◈</span> Overview</a>
-          <a href="#decision-lab" className="side-link"><span className="nav-glyph">▦</span> Decision lab</a>
-          <a href="#farms" className="side-link"><span className="nav-glyph">◇</span> Farm workspace</a>
-          <a href="#weather" className="side-link"><span className="nav-glyph">☼</span> Weather evidence</a>
+    <div className="lp-page" id="home">
+      <header className="lp-header">
+        <nav className="lp-nav" aria-label="Main navigation">
+          <Brand />
+          <button className="lp-menu-toggle" type="button" aria-label={menuOpen ? "Close navigation" : "Open navigation"} aria-expanded={menuOpen} aria-controls="lp-nav-links" onClick={() => setMenuOpen(!menuOpen)}>
+            <span /><span /><span />
+          </button>
+          <div className={"lp-nav-links" + (menuOpen ? " lp-nav-links-open" : "")} id="lp-nav-links">
+            <a href="#features" onClick={closeMenu}>Features</a>
+            <a href="#how-it-works" onClick={closeMenu}>How it works</a>
+            <a href="#preview" onClick={closeMenu}>Product preview</a>
+          </div>
+          <Link className="lp-nav-cta" href="/workspace">Open prototype <span aria-hidden="true">↗</span></Link>
         </nav>
+      </header>
 
-        <div className="sidebar-bottom">
-          <div className="side-note">
-            <span className="side-note-icon">↗</span>
-            <strong>Designed for decisions.</strong>
-            <p>Evidence first. Assumptions visible. Every result stays explainable.</p>
+      <main>
+        <section className="lp-hero" aria-labelledby="lp-hero-heading">
+          <div className="lp-hero-orb lp-orb-one" aria-hidden="true" />
+          <div className="lp-hero-orb lp-orb-two" aria-hidden="true" />
+          <div className="lp-hero-inner">
+            <span className="lp-intro-pill"><span className="lp-pill-dot" /> INTRODUCING AGRINEXUS PROOFOS <span className="lp-pill-arrow">↗</span></span>
+            <h1 id="lp-hero-heading">Good decisions<br />grow from <em>good evidence.</em></h1>
+            <p className="lp-hero-description">One thoughtful place for farm observations, transparent scenario comparisons, and the reasoning behind every decision.</p>
+            <div className="lp-hero-actions">
+              <Link className="lp-button lp-button-primary" href="/workspace">Explore the prototype <span aria-hidden="true">↗</span></Link>
+              <a className="lp-button lp-button-outline" href="#how-it-works">See how it works <span aria-hidden="true">↓</span></a>
+            </div>
+            <p className="lp-hero-note">EARLY DEVELOPMENT PROTOTYPE <span /> BUILT TO MAKE UNCERTAINTY VISIBLE</p>
           </div>
-          <span className="side-version">PROOFOS · EARLY PROTOTYPE</span>
-        </div>
-      </aside>
+        </section>
 
-      <div className="main-content">
-        <header className="topbar">
-          <div className="topbar-path"><span>AGRICULTURE INTELLIGENCE</span><span className="path-slash">/</span> Overview</div>
-          <div className="topbar-actions">
-            <span className="local-pill">LOCAL DEVELOPMENT</span>
-            <button className={"connection-pill " + health} type="button" onClick={() => void retryConnection()} title="Click to retry API connection">
-              <span className="connection-dot" aria-hidden="true" />
-              {health === "online" ? "API connected" : health === "offline" ? "API offline · retry" : "Checking API"}
-            </button>
+        <section className="lp-landscape-section" aria-label="AgriNexus illustration">
+          <FieldLandscape />
+          <div className="lp-landscape-caption"><span>ROOTED IN REAL QUESTIONS.</span><p>A better farming decision starts by knowing what you know—and what you don’t.</p><span>01 / FIELD NOTES</span></div>
+        </section>
+
+        <section className="lp-features lp-container" id="features" aria-labelledby="lp-features-heading">
+          <SectionTitle eyebrow="THE FOUNDATION" centered description="Less noise. More clarity. Three connected ways to understand the story behind a field decision.">
+            Powerful tools, <em>naturally intuitive.</em>
+          </SectionTitle>
+          <div className="lp-feature-grid">
+            {capabilities.map((feature, index) => (
+              <article className={"lp-feature-card lp-feature-" + index} key={feature.index}>
+                <div className="lp-feature-icon" aria-hidden="true">{feature.icon}</div>
+                <span className="lp-feature-index">{feature.index} / {feature.detail}</span>
+                <h3>{feature.title}</h3>
+                <p>{feature.description}</p>
+                <Link href={index === 0 ? "/workspace#farms" : index === 1 ? "/workspace#decision-lab" : "/workspace#farms"} className="lp-feature-link">Explore in prototype <span aria-hidden="true">↗</span></Link>
+              </article>
+            ))}
           </div>
-        </header>
+        </section>
 
-        <div className="page-content" id="overview">
-          <section className="hero-layout" aria-labelledby="hero-heading">
-            <div className="hero-copy">
-              <div className="section-kicker"><span className="kicker-line" /> THE FIELD COMMAND CENTER</div>
-              <h1 id="hero-heading">A clearer view<br />of <em>every decision.</em></h1>
-              <p>Bring observations, assumptions and scenario comparisons into one calm workspace. Understand what the evidence says—and what it cannot say yet.</p>
-              <div className="hero-actions">
-                <a className="primary-link" href="#decision-lab">Open decision lab <span aria-hidden="true">↗</span></a>
-                <a className="text-link" href="#farms">Explore farm records <span aria-hidden="true">→</span></a>
+        <section className="lp-story" id="how-it-works" aria-labelledby="lp-story-heading">
+          <div className="lp-story-inner lp-container">
+            <div className="lp-story-visual">
+              <div className="lp-story-blob lp-story-blob-back" />
+              <div className="lp-story-blob lp-story-blob-front">
+                <span className="lp-story-leaf" aria-hidden="true">✳</span>
+                <span>FIELD NOTES<br />TO CLEARER THINKING</span>
+                <strong>Every input<br />has a story.</strong>
               </div>
-              <div className="hero-footnote"><span className="footnote-dot" /> PROTOTYPE PREVIEW <span className="hero-footnote-separator">—</span> NO AUTOMATED FARMING ADVICE</div>
+              <span className="lp-story-stamp">NO BLACK BOX / NO HIDDEN ASSUMPTIONS</span>
             </div>
-
-            <div className="field-art" role="img" aria-label="Conceptual illustration of a cultivated field, not live satellite imagery or measured data">
-              <div className="art-top"><span>FIELD STUDY / 001</span><span className="art-more">● ● ●</span></div>
-              <div className="landscape">
-                <div className="terrain terrain-one" />
-                <div className="terrain terrain-two" />
-                <div className="terrain terrain-three" />
-                <div className="terrain terrain-four" />
-                <div className="terrain terrain-five" />
-                <div className="terrain terrain-six" />
-                <div className="landscape-grid" />
-                <div className="map-point point-one"><span /></div>
-                <div className="map-point point-two"><span /></div>
-                <div className="map-point point-three"><span /></div>
-                <div className="field-label"><span className="field-label-icon">◎</span><span>PROOF BEFORE PREDICTION<small>ILLUSTRATIVE FIELD VIEW</small></span></div>
+            <div className="lp-story-copy">
+              <span className="lp-eyebrow"><span className="lp-eyebrow-dot" /> HOW IT WORKS</span>
+              <h2 id="lp-story-heading">A little more context.<br /><em>A lot more clarity.</em></h2>
+              <p className="lp-story-description">Instead of treating an estimate like a fact, ProofOS shows where each piece of information came from—and makes missing evidence part of the conversation.</p>
+              <div className="lp-story-steps">
+                <div><span>01</span><div><strong>Record the field</strong><p>Create a demo farm and add time-stamped manual observations.</p></div></div>
+                <div><span>02</span><div><strong>Compare possible scenarios</strong><p>Enter water-balance assumptions and review illustrative calculations.</p></div></div>
+                <div><span>03</span><div><strong>Keep an evidence trail</strong><p>Save a passport with input sources, limitations, and optional follow-up notes.</p></div></div>
               </div>
-              <div className="art-bottom"><span>AGRI / PROOF OS</span><span>CONCEPT VISUAL · NOT LIVE DATA</span></div>
+              <Link href="/workspace" className="lp-text-cta">Step inside the workspace <span aria-hidden="true">↗</span></Link>
             </div>
-          </section>
+          </div>
+        </section>
 
-          <section className="overview-strip" aria-label="Prototype overview">
-            <div className="overview-item"><span className="overview-index">01 / EVIDENCE</span><strong>{availableInputs}<span className="overview-unit">/5</span></strong><span>Required scenario inputs present</span></div>
-            <div className="overview-item"><span className="overview-index">02 / ENGINE</span><strong className="overview-word">Transparent</strong><span>Illustrative water-balance model</span></div>
-            <div className="overview-item"><span className="overview-index">03 / PROVENANCE</span><strong className="overview-word">{activeFarmId ? "Farm selected" : "Manual demo"}</strong><span>{activeFarmId ? "New passports save to the selected farm" : "Select a farm to save decision passports"}</span></div>
-          </section>
-
-          <section id="decision-lab" className="workspace-section" aria-labelledby="decision-heading">
-            <div className="section-heading">
-              <div><div className="section-kicker"><span className="kicker-line" /> WORKSPACE 01</div><h2 id="decision-heading">Decision lab<span className="heading-period">.</span></h2><p>Compare two water-balance scenarios with the inputs you provide. Missing evidence is flagged instead of silently assumed.</p></div>
-              <span className="section-index">01 — 03</span>
-            </div>
-            <div className="decision-grid">
-              <div className="workspace-card input-card">
-                <div className="card-topline"><span>SCENARIO PARAMETERS</span><span className={"evidence-badge " + (scenarioReady ? "ready" : "")}>{availableInputs} / 5 REQUIRED</span></div>
-                <h3>Start with what you know.</h3>
-                <p className="card-intro">Illustrative values are prefilled for review. Change or clear any value to test the evidence gate.</p>
-                <form onSubmit={runComparison}>
-                  <div className="form">
-                    {INPUTS.map(({ key, label, hint }, index) => (
-                      <label className="field" key={key} htmlFor={key}>
-                        <span className="field-heading"><span>{String(index + 1).padStart(2, "0")}.</span> {label}</span>
-                        <span className="input-wrap"><input id={key} type="number" inputMode="decimal" step="any" min="0" value={inputs[key]} placeholder="Enter value"
-                          onChange={(event) => setInputs((old) => ({ ...old, [key]: event.target.value }))} /><span className="input-unit">mm</span></span>
-                        <span className="field-hint">{hint}</span>
-                      </label>
-                    ))}
-                  </div>
-                  <div className="form-footer">
-                    <button className="action" disabled={pending} type="submit">{pending ? "Comparing…" : "Compare scenarios"} <span aria-hidden="true">↗</span></button>
-                    <button className="quiet-button" type="button" onClick={() => { setInputs({ ...SAMPLE }); setResult(null); setError(""); setSavedToFarm(false); }}>Restore sample</button>
-                  </div>
-                  <p className="input-disclaimer">Manual, unverified input. Calculations are illustrative—not agronomic recommendations.</p>
-                </form>
-              </div>
-
-              <div className="workspace-card result-card">
-                <div className="card-topline"><span>DECISION PASSPORT</span><span className="result-counter">EXPLAINABLE OUTPUT</span></div>
-                <h3>Evidence, not guesswork.</h3>
-                <p className="card-intro">{activeFarmId ? "A comparison will be saved to your selected demo farm." : "Select a demo farm below if you want to save this comparison locally."}</p>
-                {error && <p className="error" role="alert">{error}</p>}
-                {!result && !error && <div className="result-placeholder">
-                  <div className="radar" aria-hidden="true"><span className="radar-core">◎</span><span className="radar-node radar-n1" /><span className="radar-node radar-n2" /><span className="radar-node radar-n3" /></div>
-                  <span className="placeholder-label">AWAITING COMPARISON</span>
-                  <strong>Your evidence report begins here.</strong>
-                  <p>Submit your parameters to see both scenarios, missing evidence and the assumptions behind the calculation.</p>
+        <section className="lp-preview-section lp-container" id="preview" aria-labelledby="lp-preview-heading">
+          <SectionTitle eyebrow="A LOOK INSIDE" centered description="This is a preview of the working demo. Actual outputs are generated only when you submit your own inputs in the workspace.">
+            Get closer to the <em>whole picture.</em>
+          </SectionTitle>
+          <div className="lp-product-demo">
+            <div className="lp-demo-toolbar"><div className="lp-demo-brand"><span className="lp-demo-icon">✳</span> AGRINEXUS <span>/</span> PROOFOS</div><span className="lp-demo-label">INTERFACE PREVIEW · SAMPLE DATA</span></div>
+            <div className="lp-demo-body">
+              <div className="lp-demo-sidebar" aria-hidden="true"><span className="lp-demo-sidebar-active">◈</span><span>▦</span><span>◇</span><span>☼</span></div>
+              <div className="lp-demo-main">
+                <div className="lp-demo-heading"><span className="lp-eyebrow">FIELD COMMAND CENTER / PREVIEW</span><h3>{preview === "inputs" ? "The field, in context." : preview === "comparison" ? "Compare with clarity." : "Reasoning worth keeping."}</h3><p>{preview === "inputs" ? "Make source labels visible before calculations begin." : preview === "comparison" ? "Look at two illustrative scenarios side by side." : "Preserve inputs and assumptions with a saved example record."}</p></div>
+                <div className="lp-demo-tabs" role="group" aria-label="Preview screens">
+                  <button className={preview === "inputs" ? "active" : ""} onClick={() => setPreview("inputs")} type="button" aria-pressed={preview === "inputs"}>Field context</button>
+                  <button className={preview === "comparison" ? "active" : ""} onClick={() => setPreview("comparison")} type="button" aria-pressed={preview === "comparison"}>Scenarios</button>
+                  <button className={preview === "passport" ? "active" : ""} onClick={() => setPreview("passport")} type="button" aria-pressed={preview === "passport"}>Passport</button>
+                </div>
+                {preview === "inputs" && <div className="lp-demo-cards">
+                  <div className="lp-demo-card"><span>DEMO FIELD</span><strong>Sample plot A</strong><p>Cotton · Example region</p><div className="lp-demo-card-line" /><small>Manual observation <b>31% soil moisture</b></small><small>Source <b>Manual / unverified</b></small></div>
+                  <div className="lp-demo-card lp-demo-accent"><span>EVIDENCE GATE</span><strong>Know your inputs.</strong><p>Check required measurements before comparing scenarios.</p><div className="lp-demo-progress"><i /></div><small>ILLUSTRATIVE ENTRIES · NOT LIVE DATA</small></div>
                 </div>}
-                {result && <div className="result" aria-live="polite">
-                  <div className={"report-state " + (result.status === "illustrative" ? "report-ready" : "")}>
-                    <span className="state-icon">{result.status === "illustrative" ? "✓" : "!"}</span>
-                    <span><strong>{result.status === "illustrative" ? "Illustrative comparison complete" : "More evidence required"}</strong>
-                      <small>{savedToFarm ? "Saved to selected demo farm" : "Unsaved, temporary comparison"}</small></span>
-                  </div>
-                  {result.status === "needs_evidence"
-                    ? <div className="missing-evidence"><strong>Missing inputs</strong><p>{result.missing_inputs.join(", ")}</p></div>
-                    : <div className="scenarios">{result.scenarios.map((scenario) => <div className="scenario" key={scenario.label}>
-                      <span className="scenario-caption">{scenario.label}</span><strong className="metric">{scenario.estimated_end_water_mm}<small> mm</small></strong>
-                      <span className="metric-label">Estimated water after one day</span>
-                      <div className="scenario-rule" />
-                      <div className="scenario-detail"><span>Water deficit</span><strong>{scenario.estimated_deficit_to_minimum_mm} mm</strong></div>
-                      <div className="scenario-detail"><span>Estimated overflow</span><strong>{scenario.estimated_overflow_mm} mm</strong></div>
-                    </div>)}</div>}
-                  <div className="report-disclaimer">{result.disclaimer}</div>
-                  <details className="report-details"><summary>View assumptions &amp; passport ID <span aria-hidden="true">↗</span></summary>
-                    <ul>{result.assumptions.map((assumption) => <li key={assumption}>{assumption}</li>)}</ul>
-                    <small>{savedToFarm ? "Locally saved" : "Temporary"} ID: {result.passport_id}</small>
-                  </details>
+                {preview === "comparison" && <div className="lp-demo-cards">
+                  <div className="lp-demo-card"><span>SCENARIO A / NO IRRIGATION</span><strong>30 <small>mm</small></strong><p>Illustrative end-of-day water</p><div className="lp-demo-card-line" /><small>From example manually entered values</small></div>
+                  <div className="lp-demo-card lp-demo-accent"><span>SCENARIO B / WITH IRRIGATION</span><strong>40 <small>mm</small></strong><p>Illustrative end-of-day water</p><div className="lp-demo-card-line" /><small>Not a recommendation to irrigate</small></div>
                 </div>}
-                <div className="result-footer"><span className="result-footer-dot" /> {scenarioReady ? "Required inputs entered" : "Incomplete evidence"} <span>PROOF OS / 01</span></div>
+                {preview === "passport" && <div className="lp-demo-cards">
+                  <div className="lp-demo-card"><span>ILLUSTRATIVE PASSPORT</span><strong>Evidence snapshot</strong><p>Input source: manual and unverified</p><div className="lp-demo-card-line" /><small>Assumptions explicitly recorded</small><small>Follow-ups: self-reported only</small></div>
+                  <div className="lp-demo-card lp-demo-accent"><span>INTEGRITY FIRST</span><strong>What’s still unknown?</strong><p>Observation validity, soil context, and actual crop response.</p><div className="lp-demo-card-line" /><small>NO VERIFIED FIELD OUTCOME CLAIMED</small></div>
+                </div>}
               </div>
             </div>
-          </section>
+          </div>
+          <div className="lp-preview-footer"><span>REAL WORKSPACE / LOCAL BACKEND</span><Link href="/workspace" className="lp-button lp-button-primary">Try it with your inputs <span aria-hidden="true">↗</span></Link><span>DESKTOP &amp; MOBILE RESPONSIVE</span></div>
+        </section>
 
-          <div id="farms" className="anchor-section"><FarmWorkspace onFarmSelected={setActiveFarmId} passportsVersion={passportsVersion} /></div>
-          <div id="weather" className="anchor-section"><WeatherPanel /></div>
+        <section className="lp-principle">
+          <div className="lp-principle-inner lp-container"><span className="lp-eyebrow">THE PROOFOS PRINCIPLE</span><h2>Not another prediction.<br /><em>A better way to ask questions.</em></h2><p>Transparent assumptions. Clear provenance. Honest limitations. Built for exploration, not for real-world irrigation instructions.</p><Link href="/workspace#decision-lab" className="lp-button lp-button-light">Explore the decision lab <span aria-hidden="true">↗</span></Link></div>
+        </section>
 
-          <footer className="site-footer"><span>AGRINEXUS / PROOFOS</span><p>Local prototype. Manual data is unverified. Never rely on illustrative outputs for real irrigation decisions.</p><a href="#overview">Back to top ↑</a></footer>
-        </div>
-      </div>
-    </main>
+        <footer className="lp-footer lp-container">
+          <div><Brand /><p>Evidence-led thinking for the future of farming.</p></div>
+          <div className="lp-footer-links"><a href="#features">Features</a><a href="#how-it-works">How it works</a><Link href="/workspace">Open prototype</Link></div>
+          <div className="lp-footer-bottom"><span>© AGRINEXUS PROOFOS · EARLY PROTOTYPE</span><span>Illustrative outputs only · Do not use for actual irrigation decisions.</span><a href="#home">Back to top ↑</a></div>
+        </footer>
+      </main>
+    </div>
   );
 }
