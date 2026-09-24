@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
-export const API = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000";
+export const API = process.env.NEXT_PUBLIC_API_BASE_URL || "/api";
 
 type WorkspaceState = {
   farmId: string | null;
