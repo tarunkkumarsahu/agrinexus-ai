@@ -68,13 +68,13 @@ function FieldLandscape() {
   );
 }
 
-function SectionTitle({ eyebrow, children, description, centered = false }: {
-  eyebrow: string; children: ReactNode; description?: string; centered?: boolean;
+function SectionTitle({ eyebrow, children, description, centered = false, id }: {
+  eyebrow: string; children: ReactNode; description?: string; centered?: boolean; id?: string;
 }) {
   return (
     <div className={"lp-section-title" + (centered ? " lp-section-title-centered" : "")}>
       <span className="lp-eyebrow"><span className="lp-eyebrow-dot" />{eyebrow}</span>
-      <h2>{children}</h2>
+      <h2 id={id}>{children}</h2>
       {description && <p>{description}</p>}
     </div>
   );
@@ -125,7 +125,7 @@ export default function LandingPage() {
         </section>
 
         <section className="lp-features lp-container" id="features" aria-labelledby="lp-features-heading">
-          <SectionTitle eyebrow="THE FOUNDATION" centered description="Less noise. More clarity. Three connected ways to understand the story behind a field decision.">
+          <SectionTitle id="lp-features-heading" eyebrow="THE FOUNDATION" centered description="Less noise. More clarity. Three connected ways to understand the story behind a field decision.">
             Powerful tools, <em>naturally intuitive.</em>
           </SectionTitle>
           <div className="lp-feature-grid">
@@ -167,7 +167,7 @@ export default function LandingPage() {
         </section>
 
         <section className="lp-preview-section lp-container" id="preview" aria-labelledby="lp-preview-heading">
-          <SectionTitle eyebrow="A LOOK INSIDE" centered description="This is a preview of the working demo. Actual outputs are generated only when you submit your own inputs in the workspace.">
+          <SectionTitle id="lp-preview-heading" eyebrow="A LOOK INSIDE" centered description="This is a preview of the working demo. Actual outputs are generated only when you submit your own inputs in the workspace.">
             Get closer to the <em>whole picture.</em>
           </SectionTitle>
           <div className="lp-product-demo">
