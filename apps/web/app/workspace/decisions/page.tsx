@@ -29,7 +29,7 @@ type Decision = {
   disclaimer: string;
 };
 
-const API = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000";
+const API = process.env.NEXT_PUBLIC_API_BASE_URL || "/api";
 
 const INPUTS: { key: Field; label: string; hint: string }[] = [
   { key: "root_zone_water_mm", label: "Current root-zone water", hint: "mm · manual estimate" },
