@@ -10,6 +10,9 @@ test("landing routes to a functioning local workspace without invented metrics",
   await expect(page.getByText("Evidence snapshot", { exact: true })).toBeVisible();
   await page.getByRole("link", { name: /Explore the prototype/i }).click();
   await expect(page).toHaveURL(/\/workspace/);
+  await expect(page.getByRole("heading", { name: /Every decision begins with a better question/i })).toBeVisible();
+  await page.getByRole("link", { name: /Set up a demo farm/i }).click();
+  await expect(page).toHaveURL(/\/workspace\/farms/);
   await expect(page.getByRole("heading", { name: /Your farm, in context/i })).toBeVisible();
 });
 
@@ -22,11 +25,16 @@ test("small-screen navigation stays usable", async ({ page }) => {
   await page.locator("#lp-nav-links").getByRole("link", { name: "How it works" }).click();
   await expect(page.getByRole("heading", { name: /A little more context/i })).toBeVisible();
   await expect(page.getByRole("button", { name: "Open navigation" })).toBeVisible();
+  await page.goto("/workspace");
+  await page.getByRole("button", { name: "Open workspace menu" }).click();
+  await page.getByRole("link", { name: "Weather evidence" }).click();
+  await expect(page).toHaveURL(/\/workspace\/weather/);
+  await expect(page.getByRole("button", { name: "Open workspace menu" })).toBeVisible();
   await expect(page.locator("body")).toHaveJSProperty("scrollWidth", 390);
 });
 
-test("farm → observation → passport → self-reported follow-up persists through API", async ({ page }) => {
-  await page.goto("/workspace");
+test("farm → observation → passport → self-reported follow-up persists through API across separate pages", async ({ page }) => {
+  await page.goto("/workspace/farms");
   await expect(page.getByRole("button", { name: /API connected/i })).toBeVisible({ timeout: 25_000 });
   const farm = "Automated sample farm " + Date.now();
   const form = page.locator(".farm-create-card");
@@ -44,8 +52,12 @@ test("farm → observation → passport → self-reported follow-up persists thr
   await observations.getByRole("button", { name: "Record", exact: true }).click();
   await expect(page.locator(".observation-entry").first()).toContainText("31% soil moisture");
 
+  await page.getByRole("link", { name: /Continue to Decision Lab/i }).click();
+  await expect(page).toHaveURL(/\/workspace\/decisions/);
   await page.getByRole("button", { name: /Compare & save passport/i }).click();
   await expect(page.getByText("Saved to selected demo farm")).toBeVisible();
+  await page.getByRole("link", { name: /Open evidence passports/i }).click();
+  await expect(page).toHaveURL(/\/workspace\/passports/);
   await expect(page.locator(".passport-choice")).toHaveCount(1);
   await page.locator(".passport-choice").first().click();
   await expect(page.getByRole("heading", { name: "Frozen evidence snapshot" })).toBeVisible();
@@ -71,7 +83,7 @@ test("weather panel distinguishes external forecast from user-entered scenario v
       warning: "Modeled forecast for a geographic grid cell, not a field observation.",
     }),
   }));
-  await page.goto("/workspace");
+  await page.goto("/workspace/weather");
   await page.getByRole("spinbutton", { name: "Approximate latitude" }).fill("21.2");
   await page.getByRole("spinbutton", { name: "Approximate longitude" }).fill("81.3");
   await page.getByRole("button", { name: /Fetch forecast/i }).click();
