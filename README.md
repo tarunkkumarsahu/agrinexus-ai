@@ -28,7 +28,7 @@ Open http://127.0.0.1:8000/docs or http://127.0.0.1:8000/health .
     npm install
     npm run dev
 
-Open http://localhost:3000 for the landing page and http://localhost:3000/workspace for the working prototype. The web API URL defaults to http://127.0.0.1:8000 in development; set NEXT_PUBLIC_API_BASE_URL to override.
+Open http://localhost:3000 for the landing page. The prototype is split into dedicated routes: http://localhost:3000/workspace (overview), /workspace/farms (farm records), /workspace/decisions (scenario comparison), /workspace/passports (saved evidence and follow-ups), and /workspace/weather (regional forecast). The frontend defaults to same-origin /api, which Next.js proxies to local FastAPI on http://127.0.0.1:8000. Leave NEXT_PUBLIC_API_BASE_URL unset for trusted private-Wi-Fi phone review.
 
 ## Backend tests (another terminal, at repository root)
 
@@ -38,6 +38,8 @@ Open http://localhost:3000 for the landing page and http://localhost:3000/worksp
 ## Browser checks & product walkthrough
 
 Run `npm run build` from `apps/web` for the production build. For desktop/mobile and real API-connected browser smoke tests, run `npx playwright install chromium` then `npm run test:e2e` from `apps/web` after installing the backend Python requirements. Browser tests reuse local servers if present and otherwise start the dev services; test only with non-private sample data. See [docs/demo-guide.md](docs/demo-guide.md) for the exact Windows setup, full walkthrough, evidence-origin caveats and manual review checklist.
+
+For a phone-sized preview, use Chrome/Edge DevTools → device toolbar (`Ctrl+Shift+M`) and test each page at 390 px. For a real device on trusted private Wi-Fi, follow the same-origin proxy and firewall guidance in [docs/demo-guide.md](docs/demo-guide.md); this prototype has no authentication and must not be exposed publicly.
 
 ## Android
 
