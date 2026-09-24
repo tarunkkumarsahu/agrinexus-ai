@@ -57,9 +57,11 @@ async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-export default function FarmWorkspace({ onFarmSelected, passportsVersion }: {
+export default function FarmWorkspace({ onFarmSelected, passportsVersion = 0, initialFarmId = null, view = "farms" }: {
   onFarmSelected: (farmId: string | null) => void;
-  passportsVersion: number;
+  passportsVersion?: number;
+  initialFarmId?: string | null;
+  view?: "farms" | "passports";
 }) {
   const [farms, setFarms] = useState<Farm[]>([]);
   const [loadingFarms, setLoadingFarms] = useState(true);
@@ -130,6 +132,10 @@ export default function FarmWorkspace({ onFarmSelected, passportsVersion }: {
       setLoadingContext(false);
     }
   }
+
+  useEffect(() => {
+    if (initialFarmId && initialFarmId !== selected) void selectFarm(initialFarmId);
+  }, [initialFarmId]);
 
   async function saveFarm(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -223,11 +229,11 @@ export default function FarmWorkspace({ onFarmSelected, passportsVersion }: {
 
   return (
     <section className="farm-workspace" aria-labelledby="farm-heading">
-      <div className="eyebrow">WORKSPACE 02 / FIELD CONTEXT</div>
-      <h2 id="farm-heading">Your farm, in context.</h2>
-      <p className="muted">Create or select a demo farm to save scenario passports. Records remain in this local SQLite database. There is no account isolation: use sample information and keep the API private.</p>
+      <div className="eyebrow">{view === "farms" ? "WORKSPACE 01 / FARM RECORDS" : "WORKSPACE 03 / DECISION PASSPORTS"}</div>
+      <h2 id="farm-heading">{view === "farms" ? "Your farm, in context." : "Every record has a story."}</h2>
+      <p className="muted">{view === "farms" ? "Create or select a demo farm and record manual observations. Records remain in local SQLite; use sample information only." : "Open a saved record to inspect its frozen evidence snapshot, assumptions and optional self-reported follow-ups."}</p>
 
-      <div className="farm-intro-grid">
+      {view === "farms" && <div className="farm-intro-grid">
         <div className="panel farm-create-card">
           <div className="card-topline"><span>STEP 01 / CREATE CONTEXT</span><span className="evidence-badge ready">LOCAL ONLY</span></div>
           <h2>Register a demo farm</h2>
@@ -258,15 +264,23 @@ export default function FarmWorkspace({ onFarmSelected, passportsVersion }: {
                 <span className="farm-choice-end">{farm.id === selected ? "SELECTED ✓" : "SELECT →"}</span>
               </button>)}
             </div>}
-          {activeFarm && <div className="farm-active-banner" role="status"><span className="lp-live-dot" /> Active farm: <strong>{activeFarm.name}</strong><a href="#decision-lab">Compare scenarios ↗</a></div>}
+          {activeFarm && <div className="farm-active-banner" role="status"><span className="lp-live-dot" /> Active farm: <strong>{activeFarm.name}</strong><a href="/workspace/decisions">Compare scenarios ↗</a></div>}
         </div>
-      </div>
+      </div>}
 
-      {loadingContext && <div className="panel farm-context-card" role="status">Loading field observations and saved passports…</div>}
+      {view === "passports" && <div className="panel workspace-passport-farm"><label className="field">Demo farm for saved records
+        <select value={selected} onChange={(event) => void selectFarm(event.target.value)}>
+          <option value="">Select a demo farm</option>
+          {farms.map((farm) => <option key={farm.id} value={farm.id}>{farm.name} · {farm.crop}</option>)}
+        </select></label>
+        {!selected && <p className="muted">Choose a farm above or <a href="/workspace/farms">create one in Farm Records ↗</a>.</p>}
+      </div>}
+
+      {loadingContext && <div className="panel farm-context-card" role="status">Loading local farm records…</div>}
       {activeFarm && !loadingContext && <div className="farm-context-section">
         <div className="farm-context-banner"><div><span className="eyebrow">ACTIVE FIELD RECORD</span><h3>{activeFarm.name}</h3><p>{activeFarm.crop} · {activeFarm.region} · {activeFarm.area_ha} hectares</p></div><span className="farm-context-label">MANUALLY ENTERED / LOCAL</span></div>
-        <div className="farm-context-grid">
-          <div className="panel farm-context-card">
+        <div className={"farm-context-grid " + (view === "farms" ? "farm-only-grid" : "passport-only-grid")}>
+          {view === "farms" && <div className="panel farm-context-card">
             <div className="card-topline"><span>03 / FIELD OBSERVATIONS</span><span className="evidence-badge">{observations.length} RECORDS</span></div>
             <h2>Capture an observation.</h2>
             <p className="muted">Soil moisture (%) below is a manual estimate; it is <strong>not</strong> silently converted into root-zone water (mm) for comparison.</p>
@@ -285,9 +299,9 @@ export default function FarmWorkspace({ onFarmSelected, passportsVersion }: {
               {observations.length === 0 ? <p className="muted">No observations yet. New records will appear here.</p> :
                 observations.slice(0, 8).map((observation) => <div className="observation-entry" key={observation.id}><span className="observation-bullet" /><div><strong>{observation.soil_moisture_pct}% soil moisture</strong><p>{dateLabel(observation.recorded_at)} · manual, unverified{observation.note ? " · " + observation.note : ""}</p></div></div>)}
             </div>
-          </div>
+          </div>}
 
-          <div className="panel farm-context-card">
+          {view === "passports" && <div className="panel farm-context-card">
             <div className="card-topline"><span>04 / SAVED DECISIONS</span><span className="evidence-badge ready">{passports.length} PASSPORTS</span></div>
             <h2>Your evidence trail.</h2>
             <p className="muted">Select this farm before comparing scenarios. Open any saved record to inspect its captured evidence and add a self-reported follow-up.</p>
@@ -337,9 +351,10 @@ export default function FarmWorkspace({ onFarmSelected, passportsVersion }: {
                 <div className="followup-history"><h4>Follow-up history</h4>{detail.followups.length === 0 ? <p className="muted">No follow-ups recorded yet.</p> : detail.followups.map((entry) => <div key={entry.id} className="followup-entry"><strong>{entry.action_taken.replace(/_/g, " ")} · self-reported</strong><small>{dateLabel(entry.created_at)}</small>{entry.note && <p>{entry.note}</p>}<p>{entry.observation ? "Linked later manual observation: " + entry.observation.soil_moisture_pct + "% (" + dateLabel(entry.observation.recorded_at) + ")" : "No observation linked"}</p></div>)}</div>
               </div>
             </div>}
-          </div>
+          </div>}
         </div>
       </div>}
+      {view === "farms" && activeFarm && !loadingContext && <div className="farm-page-next"><strong>Field context recorded.</strong><span>Next, run an illustrative scenario with this selected demo farm.</span><a className="primary-link" href="/workspace/decisions">Continue to Decision Lab ↗</a></div>}
       {message && <p className="workspace-message" role="status">{message}</p>}
       {error && <div className="workspace-error" role="alert"><p>{error}</p><button type="button" className="quiet-button" onClick={() => { if (selected) void selectFarm(selected); else void reloadFarms(); }}>Retry ↗</button></div>}
     </section>
